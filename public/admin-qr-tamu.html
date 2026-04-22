@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin QR Tamu — Nathan & Ana Wedding</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --rose: #e8294a;
+  --rose-light: #fce8ec;
+  --cream: #fdf8f5;
+  --dark: #1a1010;
+  --muted: #7a6a6a;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Jost',sans-serif; background:var(--cream); color:var(--dark); min-height:100vh; }
+
+header {
+  background: linear-gradient(135deg, var(--rose) 0%, #c41e3a 100%);
+  color: #fff;
+  padding: 2rem;
+  text-align: center;
+}
+header h1 { font-family:'Playfair Display',serif; font-size:2rem; margin-bottom:0.3rem; }
+header p { opacity:0.85; font-size:0.95rem; }
+
+.container { max-width:900px; margin:0 auto; padding:2rem; }
+
+/* ADD GUEST */
+.add-box {
+  background:#fff;
+  border-radius:16px;
+  padding:1.8rem;
+  box-shadow:0 4px 20px rgba(232,41,74,0.09);
+  margin-bottom:2rem;
+}
+.add-box h2 { font-size:1.1rem; font-weight:600; margin-bottom:1.2rem; display:flex; align-items:center; gap:0.5rem; }
+.input-row { display:flex; gap:0.8rem; flex-wrap:wrap; }
+.input-row input {
+  flex:1; min-width:200px;
+  padding:0.8rem 1rem;
+  border:1.5px solid #e8ddd8;
+  border-radius:10px;
+  font-family:'Jost',sans-serif;
+  font-size:0.95rem;
+  outline:none;
+  transition:border-color 0.2s;
+}
+.input-row input:focus { border-color:var(--rose); }
+.btn {
+  padding:0.8rem 1.4rem;
+  background:var(--rose);
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  font-family:'Jost',sans-serif;
+  font-size:0.92rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:background 0.2s, transform 0.15s;
+  white-space:nowrap;
+}
+.btn:hover { background:#cc1e3a; transform:translateY(-1px); }
+.btn-outline {
+  background:transparent;
+  color:var(--rose);
+  border:1.5px solid var(--rose);
+}
+.btn-outline:hover { background:var(--rose-light); transform:none; }
+
+/* BULK INPUT */
+.bulk-box {
+  background:#fff;
+  border-radius:16px;
+  padding:1.8rem;
+  box-shadow:0 4px 20px rgba(232,41,74,0.09);
+  margin-bottom:2rem;
+}
+.bulk-box h2 { font-size:1.1rem; font-weight:600; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem; }
+.bulk-box p { font-size:0.85rem; color:var(--muted); margin-bottom:0.8rem; }
+.bulk-box textarea {
+  width:100%;
+  padding:0.8rem 1rem;
+  border:1.5px solid #e8ddd8;
+  border-radius:10px;
+  font-family:'Jost',sans-serif;
+  font-size:0.92rem;
+  outline:none;
+  resize:vertical;
+  min-height:100px;
+  margin-bottom:0.8rem;
+  transition:border-color 0.2s;
+}
+.bulk-box textarea:focus { border-color:var(--rose); }
+
+/* STATS */
+.stats {
+  display:flex;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+.stat-card {
+  flex:1; min-width:120px;
+  background:#fff;
+  border-radius:12px;
+  padding:1rem;
+  text-align:center;
+  box-shadow:0 2px 12px rgba(232,41,74,0.07);
+}
+.stat-num { font-family:'Playfair Display',serif; font-size:2rem; color:var(--rose); font-weight:700; }
+.stat-label { font-size:0.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; margin-top:0.2rem; }
+
+/* CONTROLS */
+.controls {
+  display:flex;
+  gap:0.8rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.search-input {
+  flex:1; min-width:180px;
+  padding:0.7rem 1rem;
+  border:1.5px solid #e8ddd8;
+  border-radius:10px;
+  font-family:'Jost',sans-serif;
+  font-size:0.92rem;
+  outline:none;
+}
+.search-input:focus { border-color:var(--rose); }
+
+/* GUEST LIST */
+.guest-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+  gap:1.2rem;
+}
+.guest-card {
+  background:#fff;
+  border-radius:14px;
+  padding:1.4rem;
+  box-shadow:0 2px 16px rgba(232,41,74,0.07);
+  transition:transform 0.2s, box-shadow 0.2s;
+  position:relative;
+}
+.guest-card:hover { transform:translateY(-3px); box-shadow:0 6px 24px rgba(232,41,74,0.12); }
+.guest-num {
+  position:absolute;
+  top:0.8rem; right:0.8rem;
+  background:var(--rose-light);
+  color:var(--rose);
+  border-radius:20px;
+  padding:0.2rem 0.6rem;
+  font-size:0.72rem;
+  font-weight:600;
+}
+.guest-name { font-weight:600; font-size:1rem; margin-bottom:0.3rem; padding-right:2.5rem; }
+.guest-link {
+  font-size:0.75rem;
+  color:var(--muted);
+  word-break:break-all;
+  margin-bottom:0.8rem;
+  background:var(--cream);
+  padding:0.35rem 0.6rem;
+  border-radius:6px;
+}
+.guest-qr { display:flex; justify-content:center; margin:0.8rem 0; }
+.guest-qr > div { border-radius:8px; overflow:hidden; }
+.card-actions { display:flex; gap:0.5rem; flex-wrap:wrap; }
+.btn-sm {
+  flex:1;
+  padding:0.55rem 0.5rem;
+  font-size:0.78rem;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
+  font-family:'Jost',sans-serif;
+  font-weight:600;
+  transition:all 0.2s;
+}
+.btn-dl { background:var(--rose); color:#fff; }
+.btn-dl:hover { background:#cc1e3a; }
+.btn-copy { background:var(--rose-light); color:var(--rose); }
+.btn-copy:hover { background:#f5c0cb; }
+.btn-del { background:#f5f0f0; color:#999; }
+.btn-wa { background:#25D366; color:#fff; }
+.btn-wa:hover { background:#128C7E; }
+.btn-del:hover { background:#ffe0e0; color:var(--rose); }
+
+/* EMPTY */
+.empty { text-align:center; padding:3rem; color:var(--muted); grid-column:1/-1; }
+.empty div { font-size:3rem; margin-bottom:0.5rem; }
+
+/* BASE URL SETTING */
+.url-box {
+  background:#fff3f5;
+  border:1.5px solid var(--rose-light);
+  border-radius:12px;
+  padding:1rem 1.2rem;
+  margin-bottom:2rem;
+  display:flex;
+  align-items:center;
+  gap:0.8rem;
+  flex-wrap:wrap;
+}
+.url-box label { font-size:0.85rem; font-weight:600; white-space:nowrap; }
+.url-box input {
+  flex:1; min-width:200px;
+  padding:0.6rem 0.8rem;
+  border:1.5px solid #e8ddd8;
+  border-radius:8px;
+  font-family:'Jost',sans-serif;
+  font-size:0.85rem;
+  outline:none;
+}
+.url-box input:focus { border-color:var(--rose); }
+.url-tip { font-size:0.78rem; color:var(--muted); width:100%; }
+
+/* TOAST */
+.toast {
+  position:fixed; bottom:1.5rem; right:1.5rem;
+  background:var(--dark); color:#fff;
+  padding:0.9rem 1.4rem;
+  border-radius:12px;
+  font-size:0.88rem;
+  box-shadow:0 8px 30px rgba(0,0,0,0.2);
+  transform:translateY(80px); opacity:0;
+  transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  z-index:999;
+}
+.toast.show { transform:translateY(0); opacity:1; }
+
+@media(max-width:600px) {
+  .controls { flex-direction:column; }
+  .input-row { flex-direction:column; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>💍 Admin QR Tamu</h1>
+  <p>Nathan &amp; Ana Wedding · 26 December 2026 · GSJS Pakuwon Mall Surabaya</p>
+</header>
+
+<div class="container">
+
+  <!-- BASE URL SETTING -->
+  <div class="url-box">
+    <label>🌐 URL Website:</label>
+    <input type="text" id="base-url" placeholder="https://nathan-ana-wedding.netlify.app"
+      oninput="saveBaseUrl()" />
+    <span class="url-tip">Isi dengan URL website kamu di Netlify setelah upload. Ini akan jadi bagian dari link unik setiap tamu.</span>
+  </div>
+
+  <!-- ADD SINGLE GUEST -->
+  <div class="add-box">
+    <h2>👤 Tambah Tamu Satu per Satu</h2>
+    <div class="input-row">
+      <input type="text" id="guest-input" placeholder="Nama tamu (contoh: Budi Santoso)"
+        onkeydown="if(event.key==='Enter') addGuest()"/>
+      <button class="btn" onclick="addGuest()">+ Tambah Tamu</button>
+    </div>
+  </div>
+
+  <!-- BULK ADD -->
+  <div class="bulk-box">
+    <h2>📋 Tambah Banyak Tamu Sekaligus</h2>
+    <p>Tulis satu nama per baris, lalu klik "Tambah Semua"</p>
+    <textarea id="bulk-input" placeholder="Budi Santoso
+Sari Dewi
+Ahmad Fauzi
+Rina Wati
+..."></textarea>
+    <div style="display:flex;gap:0.8rem;flex-wrap:wrap;">
+      <button class="btn" onclick="addBulk()">📋 Tambah Semua</button>
+      <button class="btn btn-outline" onclick="clearAll()">🗑️ Hapus Semua Tamu</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-total">0</div>
+      <div class="stat-label">Total Tamu</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:#27ae60" id="stat-qr">0</div>
+      <div class="stat-label">QR Dibuat</div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <input type="text" class="search-input" id="search-input"
+      placeholder="🔍 Cari nama tamu..."
+      oninput="renderGuests()"/>
+    <button class="btn" onclick="downloadAllQR()">⬇️ Download Semua QR</button>
+  </div>
+
+  <!-- GUEST GRID -->
+  <div class="guest-grid" id="guest-grid">
+    <div class="empty">
+      <div>👥</div>
+      <p>Belum ada tamu. Tambahkan nama tamu di atas!</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_BASE = window.location.origin;
+let guests = [];
+let qrInstances = {};
+
+// Load saved data from MongoDB
+async function loadData() {
+  try {
+    const res = await fetch(API_BASE + '/api/guests');
+    guests = await res.json();
+    const savedUrl = localStorage.getItem('nathan_ana_base_url') || '';
+    document.getElementById('base-url').value = savedUrl;
+    renderGuests();
+  } catch(e) {
+    showToast('⚠️ Tidak dapat terhubung ke server MongoDB.');
+  }
+}
+
+function saveBaseUrl() {
+  localStorage.setItem('nathan_ana_base_url', document.getElementById('base-url').value.trim());
+  renderGuests();
+}
+
+function getBaseUrl() {
+  const url = document.getElementById('base-url').value.trim();
+  return url || 'https://nathan-ana-wedding.com';
+}
+
+function slugify(name) {
+  return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '').replace(/--+/g, '-');
+}
+
+function getGuestUrl(name) {
+  return getBaseUrl() + '/?tamu=' + encodeURIComponent(name);
+}
+
+async function addGuest() {
+  const input = document.getElementById('guest-input');
+  const name = input.value.trim();
+  if (!name) { showToast('⚠️ Masukkan nama tamu dulu!'); return; }
+
+  try {
+    const res = await fetch(API_BASE + '/api/guests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    });
+    const json = await res.json();
+    if (res.status === 409) { showToast('⚠️ Nama ini sudah ada!'); return; }
+    if (!res.ok) { showToast('⚠️ Gagal tambah tamu.'); return; }
+    guests.push(json);
+    renderGuests();
+    input.value = '';
+    showToast('✅ ' + name + ' berhasil ditambahkan!');
+  } catch(e) { showToast('⚠️ Tidak dapat terhubung ke server.'); }
+}
+
+async function addBulk() {
+  const textarea = document.getElementById('bulk-input');
+  const lines = textarea.value.split('\n').map(l => l.trim()).filter(l => l);
+  if (!lines.length) { showToast('⚠️ Tulis nama tamu dulu!'); return; }
+
+  try {
+    const res = await fetch(API_BASE + '/api/guests/bulk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ names: lines })
+    });
+    const json = await res.json();
+    guests.push(...json.guests);
+    renderGuests();
+    textarea.value = '';
+    showToast('✅ ' + json.added + ' tamu berhasil ditambahkan!');
+  } catch(e) { showToast('⚠️ Tidak dapat terhubung ke server.'); }
+}
+
+async function removeGuest(id) {
+  try {
+    await fetch(API_BASE + '/api/guests/' + id, { method: 'DELETE' });
+    guests = guests.filter(g => String(g._id) !== String(id));
+    renderGuests();
+    showToast('🗑️ Tamu dihapus');
+  } catch(e) { showToast('⚠️ Gagal hapus tamu.'); }
+}
+
+async function clearAll() {
+  if (!confirm('Hapus semua tamu? Tidak bisa di-undo.')) return;
+  try {
+    await fetch(API_BASE + '/api/guests', { method: 'DELETE' });
+    guests = []; qrInstances = {};
+    renderGuests();
+    showToast('🗑️ Semua tamu dihapus');
+  } catch(e) { showToast('⚠️ Gagal hapus semua tamu.'); }
+}
+
+function renderGuests() {
+  const grid = document.getElementById('guest-grid');
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const filtered = guests.filter(g => g.name.toLowerCase().includes(search));
+
+  document.getElementById('stat-total').textContent = guests.length;
+  document.getElementById('stat-qr').textContent = guests.length;
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty"><div>' + (guests.length ? '🔍' : '👥') + '</div><p>' +
+      (guests.length ? 'Tidak ada hasil pencarian.' : 'Belum ada tamu. Tambahkan nama tamu di atas!') +
+      '</p></div>';
+    return;
+  }
+
+  grid.innerHTML = '';
+  filtered.forEach((guest, idx) => {
+    const guestUrl = getGuestUrl(guest.name);
+    const qrId = 'qr-' + guest._id;
+
+    const card = document.createElement('div');
+    card.className = 'guest-card';
+    card.innerHTML = `
+      <div class="guest-num">#${guests.indexOf(guest) + 1}</div>
+      <div class="guest-name">👤 ${escHtml(guest.name)}</div>
+      <div class="guest-link" title="Link undangan unik">🔗 ${escHtml(guestUrl)}</div>
+      <div class="guest-qr" id="${qrId}"></div>
+      <div class="card-actions">
+        <button class="btn-sm btn-dl" onclick="downloadQR('${guest._id}', '${escHtml(guest.name)}')">⬇️ QR</button>
+        <button class="btn-sm btn-copy" onclick="copyLink('${escHtml(guestUrl)}')">📋 Link</button>
+        <button class="btn-sm btn-wa" onclick="shareWA('${escHtml(guest.name)}', '${escHtml(guestUrl)}')">💬 WA</button>
+        <button class="btn-sm btn-del" onclick="removeGuest('${guest._id}')">🗑️</button>
+      </div>
+    `;
+    grid.appendChild(card);
+
+    const qrEl = document.getElementById(qrId);
+    if (qrEl) {
+      try {
+        const qr = new QRCode(qrEl, {
+          text: guestUrl,
+          width: 160, height: 160,
+          colorDark: '#1a1010', colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.H
+        });
+        qrInstances[guest._id] = { qr, name: guest.name, url: guestUrl };
+      } catch(e) {}
+    }
+  });
+}
+
+function copyLink(url) {
+  navigator.clipboard.writeText(url).then(() => showToast('📋 Link berhasil di-copy!')).catch(() => showToast('⚠️ Gagal copy, coba manual'));
+}
+
+function shareWA(name, url) {
+  const msg = encodeURIComponent(`Halo ${name}! 🎉\n\nKamu diundang ke pernikahan Nathan & Ana\n📅 26 December 2026\n📍 GSJS Pakuwon Mall Surabaya\n\nBuka link undangan personal kamu di sini:\n${url}\n\nSampai jumpa di hari istimewa kami! 💍`);
+  window.open('https://wa.me/?text=' + msg, '_blank');
+}
+
+function downloadQR(id, name) {
+  const qrEl = document.getElementById('qr-' + id);
+  if (!qrEl) return;
+  const canvas = qrEl.querySelector('canvas');
+  if (!canvas) { showToast('⚠️ QR belum siap, tunggu sebentar!'); return; }
+
+  const guestUrl = getGuestUrl(name);
+  const off = document.createElement('canvas');
+  off.width = 360; off.height = 460;
+  const ctx = off.getContext('2d');
+
+  ctx.fillStyle = '#fdf8f5'; ctx.fillRect(0,0,360,460);
+  ctx.strokeStyle = '#e8294a'; ctx.lineWidth = 3;
+  roundRect(ctx, 8, 8, 344, 444, 16); ctx.stroke();
+
+  ctx.fillStyle = '#e8294a'; ctx.font = 'bold 18px serif'; ctx.textAlign = 'center';
+  ctx.fillText('Nathan & Ana', 180, 45);
+  ctx.fillStyle = '#7a6a6a'; ctx.font = '12px sans-serif';
+  ctx.fillText('26 December 2026', 180, 64);
+  ctx.fillText('GSJS Pakuwon Mall, Surabaya', 180, 80);
+
+  ctx.strokeStyle = '#fce8ec'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(30,92); ctx.lineTo(330,92); ctx.stroke();
+
+  ctx.drawImage(canvas, 80, 105, 200, 200);
+
+  ctx.fillStyle = '#1a1010'; ctx.font = 'bold 20px serif';
+  ctx.fillText(name, 180, 336);
+  ctx.fillStyle = '#7a6a6a'; ctx.font = '11px sans-serif';
+  ctx.fillText('Tamu Undangan', 180, 355);
+
+  ctx.fillStyle = '#bbb'; ctx.font = '9px sans-serif';
+  const shortUrl = guestUrl.length > 50 ? guestUrl.substring(0,47)+'...' : guestUrl;
+  ctx.fillText(shortUrl, 180, 380);
+
+  ctx.fillStyle = '#e8294a'; ctx.font = '20px serif';
+  ctx.fillText('♥', 180, 420);
+
+  const link = document.createElement('a');
+  link.download = 'QR-' + name.replace(/\s+/g,'-') + '-NathanAna.png';
+  link.href = off.toDataURL('image/png');
+  link.click();
+  showToast('⬇️ QR ' + name + ' berhasil didownload!');
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+function downloadAllQR() {
+  if (!guests.length) { showToast('⚠️ Belum ada tamu!'); return; }
+  showToast('⏳ Mendownload semua QR (' + guests.length + ' tamu)...');
+  guests.forEach((g, i) => { setTimeout(() => downloadQR(g._id, g.name), i * 600); });
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// INIT
+loadData();
+</script>
+</body>
+</html>

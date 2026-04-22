@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Check-In Tamu — Nathan & Ana Wedding</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
+<style>
+:root {
+  --rose: #e8294a;
+  --rose-light: #fce8ec;
+  --green: #27ae60;
+  --green-light: #e8f8ef;
+  --cream: #fdf8f5;
+  --dark: #1a1010;
+  --muted: #7a6a6a;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Jost',sans-serif; background:var(--cream); color:var(--dark); min-height:100vh; }
+
+header {
+  background: linear-gradient(135deg, var(--rose), #c41e3a);
+  color:#fff; padding:1.5rem 2rem; text-align:center;
+}
+header h1 { font-family:'Playfair Display',serif; font-size:1.8rem; }
+header p { opacity:0.85; font-size:0.88rem; margin-top:0.2rem; }
+
+.container { max-width:800px; margin:0 auto; padding:1.5rem; }
+
+/* TABS */
+.tabs { display:flex; gap:0; background:#fff; border-radius:14px; padding:5px; box-shadow:0 2px 12px rgba(232,41,74,0.1); margin-bottom:1.5rem; }
+.tab { flex:1; padding:0.75rem; border:none; border-radius:10px; font-family:'Jost',sans-serif; font-size:0.9rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+.tab.active { background:var(--rose); color:#fff; }
+.tab:not(.active) { background:transparent; color:var(--muted); }
+
+/* SCANNER */
+.scanner-box {
+  background:#fff; border-radius:16px; padding:1.5rem;
+  box-shadow:0 4px 20px rgba(232,41,74,0.09); margin-bottom:1.5rem;
+}
+.scanner-box h2 { font-size:1rem; font-weight:600; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
+
+#video-container {
+  position:relative; width:100%; max-width:400px; margin:0 auto;
+  border-radius:12px; overflow:hidden; background:#000;
+}
+#scanner-video { width:100%; display:block; }
+.scan-overlay {
+  position:absolute; inset:0;
+  border:3px solid var(--rose);
+  border-radius:12px;
+  box-shadow: inset 0 0 0 60px rgba(0,0,0,0.4);
+}
+.scan-line {
+  position:absolute; left:10%; right:10%; height:2px;
+  background:var(--rose);
+  animation:scan 2s linear infinite;
+}
+@keyframes scan { 0%{top:20%} 100%{top:80%} }
+
+.btn { padding:0.8rem 1.4rem; background:var(--rose); color:#fff; border:none; border-radius:10px; font-family:'Jost',sans-serif; font-size:0.92rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+.btn:hover { background:#cc1e3a; }
+.btn-green { background:var(--green); }
+.btn-green:hover { background:#219a52; }
+.btn-outline { background:transparent; color:var(--rose); border:1.5px solid var(--rose); }
+
+/* RESULT CARD */
+.result-card {
+  border-radius:16px; padding:1.5rem; margin-bottom:1.5rem;
+  display:none; animation:pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes pop { from{transform:scale(0.8);opacity:0;} to{transform:scale(1);opacity:1;} }
+.result-card.valid { background:var(--green-light); border:2px solid var(--green); display:block; }
+.result-card.invalid { background:#fff0f0; border:2px solid #e74c3c; display:block; }
+.result-card.already { background:#fff8e1; border:2px solid #f39c12; display:block; }
+
+.result-icon { font-size:3rem; text-align:center; margin-bottom:0.5rem; }
+.result-status { font-size:1.2rem; font-weight:700; text-align:center; margin-bottom:1rem; }
+.result-info { display:grid; gap:0.5rem; }
+.result-row { display:flex; gap:0.5rem; font-size:0.9rem; }
+.result-row strong { min-width:100px; color:var(--muted); }
+
+/* MANUAL INPUT */
+.manual-box {
+  background:#fff; border-radius:16px; padding:1.5rem;
+  box-shadow:0 4px 20px rgba(232,41,74,0.09); margin-bottom:1.5rem;
+}
+.input-row { display:flex; gap:0.8rem; }
+.input-row input {
+  flex:1; padding:0.8rem 1rem; border:1.5px solid #e8ddd8;
+  border-radius:10px; font-family:'Jost',sans-serif; font-size:0.92rem; outline:none;
+}
+.input-row input:focus { border-color:var(--rose); }
+
+/* GUEST LIST */
+.guest-table-box {
+  background:#fff; border-radius:16px; padding:1.5rem;
+  box-shadow:0 4px 20px rgba(232,41,74,0.09);
+}
+.stats-row { display:flex; gap:1rem; margin-bottom:1.2rem; flex-wrap:wrap; }
+.stat { flex:1; min-width:100px; text-align:center; padding:1rem; border-radius:10px; }
+.stat.total { background:var(--rose-light); }
+.stat.checked { background:var(--green-light); }
+.stat.pending { background:#fff8e1; }
+.stat-n { font-size:2rem; font-weight:700; font-family:'Playfair Display',serif; }
+.stat.total .stat-n { color:var(--rose); }
+.stat.checked .stat-n { color:var(--green); }
+.stat.pending .stat-n { color:#f39c12; }
+.stat-l { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-top:0.2rem; }
+
+.search-input {
+  width:100%; padding:0.7rem 1rem; border:1.5px solid #e8ddd8;
+  border-radius:10px; font-family:'Jost',sans-serif; font-size:0.92rem;
+  outline:none; margin-bottom:1rem;
+}
+.search-input:focus { border-color:var(--rose); }
+
+.guest-table { width:100%; border-collapse:collapse; font-size:0.88rem; }
+.guest-table th { text-align:left; padding:0.6rem 0.8rem; background:var(--rose-light); color:var(--rose); font-weight:600; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; }
+.guest-table td { padding:0.7rem 0.8rem; border-bottom:1px solid #f5f0f0; }
+.guest-table tr:last-child td { border-bottom:none; }
+.badge {
+  display:inline-block; padding:0.2rem 0.6rem; border-radius:20px;
+  font-size:0.72rem; font-weight:600;
+}
+.badge.hadir { background:var(--green-light); color:var(--green); }
+.badge.tidak { background:#fff0f0; color:#e74c3c; }
+.badge.checkedin { background:var(--green); color:#fff; }
+.badge.waiting { background:#fff8e1; color:#f39c12; }
+
+.btn-checkin-manual {
+  padding:0.35rem 0.7rem; background:var(--rose); color:#fff;
+  border:none; border-radius:6px; font-size:0.75rem; font-weight:600;
+  cursor:pointer; font-family:'Jost',sans-serif;
+}
+.btn-undo {
+  padding:0.35rem 0.7rem; background:#f5f0f0; color:var(--muted);
+  border:none; border-radius:6px; font-size:0.75rem; cursor:pointer;
+  font-family:'Jost',sans-serif;
+}
+
+.empty-state { text-align:center; padding:2.5rem; color:var(--muted); }
+.empty-state div { font-size:2.5rem; margin-bottom:0.5rem; }
+
+/* TOAST */
+.toast {
+  position:fixed; bottom:1.5rem; right:1.5rem;
+  background:var(--dark); color:#fff; padding:0.9rem 1.4rem;
+  border-radius:12px; font-size:0.88rem;
+  box-shadow:0 8px 30px rgba(0,0,0,0.2);
+  transform:translateY(80px); opacity:0;
+  transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index:999;
+}
+.toast.show { transform:translateY(0); opacity:1; }
+
+@media(max-width:500px) {
+  .stats-row { flex-direction:column; }
+  .input-row { flex-direction:column; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎫 Check-In Tamu</h1>
+  <p>Nathan &amp; Ana Wedding · 26 December 2026 · GSJS Pakuwon Mall</p>
+</header>
+
+<div class="container">
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('scanner')">📷 Scan QR</button>
+    <button class="tab" onclick="switchTab('manual')">⌨️ Manual</button>
+    <button class="tab" onclick="switchTab('list')">📋 Daftar Tamu</button>
+  </div>
+
+  <!-- ── SCANNER TAB ── -->
+  <div id="tab-scanner">
+    <div class="scanner-box">
+      <h2>📷 Scan QR Tiket Tamu</h2>
+      <div id="video-container" style="display:none;">
+        <video id="scanner-video" playsinline autoplay muted></video>
+        <div class="scan-overlay">
+          <div class="scan-line"></div>
+        </div>
+      </div>
+      <canvas id="scanner-canvas" style="display:none;"></canvas>
+
+      <div id="scanner-controls" style="text-align:center;padding:1rem 0;">
+        <button class="btn" onclick="startCamera()" id="btn-start-cam">📷 Aktifkan Kamera</button>
+      </div>
+
+      <div id="scan-status" style="text-align:center;color:var(--muted);font-size:0.85rem;margin-top:0.5rem;"></div>
+    </div>
+
+    <!-- Result -->
+    <div id="scan-result" class="result-card">
+      <div class="result-icon" id="res-icon"></div>
+      <div class="result-status" id="res-status"></div>
+      <div class="result-info" id="res-info"></div>
+      <div style="display:flex;gap:0.8rem;margin-top:1rem;justify-content:center;flex-wrap:wrap;">
+        <button class="btn btn-green" id="btn-confirm-checkin" onclick="confirmCheckin()" style="display:none;">
+          ✅ Konfirmasi Check-In
+        </button>
+        <button class="btn btn-outline" onclick="resetScan()">🔄 Scan Lagi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MANUAL TAB ── -->
+  <div id="tab-manual" style="display:none;">
+    <div class="manual-box">
+      <h2>⌨️ Check-In Manual</h2>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;">Masukkan Ticket ID atau nama tamu untuk check-in manual.</p>
+      <div class="input-row">
+        <input type="text" id="manual-input" placeholder="Ticket ID (contoh: NA-BUDI-ABC123) atau nama tamu"
+          onkeydown="if(event.key==='Enter') manualCheckin()"/>
+        <button class="btn" onclick="manualCheckin()">✅ Check-In</button>
+      </div>
+    </div>
+
+    <div id="manual-result" class="result-card">
+      <div class="result-icon" id="manual-res-icon"></div>
+      <div class="result-status" id="manual-res-status"></div>
+      <div class="result-info" id="manual-res-info"></div>
+    </div>
+  </div>
+
+  <!-- ── GUEST LIST TAB ── -->
+  <div id="tab-list" style="display:none;">
+    <div class="guest-table-box">
+      <div class="stats-row">
+        <div class="stat total">
+          <div class="stat-n" id="stat-total">0</div>
+          <div class="stat-l">Total Tamu</div>
+        </div>
+        <div class="stat checked">
+          <div class="stat-n" id="stat-checked">0</div>
+          <div class="stat-l">Sudah Hadir</div>
+        </div>
+        <div class="stat pending">
+          <div class="stat-n" id="stat-pending">0</div>
+          <div class="stat-l">Belum Hadir</div>
+        </div>
+      </div>
+
+      <input type="text" class="search-input" id="list-search" placeholder="🔍 Cari nama tamu..." oninput="renderList()"/>
+
+      <div style="display:flex;gap:0.8rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <button class="btn" onclick="exportCSV()" style="font-size:0.85rem;padding:0.6rem 1rem;">📊 Export CSV</button>
+        <button class="btn btn-outline" onclick="if(confirm('Reset semua data check-in?')) { clearCheckins(); }" style="font-size:0.85rem;padding:0.6rem 1rem;">🗑️ Reset Data</button>
+      </div>
+
+      <div id="guest-list-container">
+        <div class="empty-state"><div>👥</div><p>Belum ada data tamu.<br>Tamu yang sudah RSVP akan muncul di sini.</p></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_BASE = window.location.origin;
+let pendingScanData = null;
+let scanInterval = null;
+let videoStream = null;
+
+// ── TABS ──
+function switchTab(tab) {
+  ['scanner','manual','list'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+    document.querySelectorAll('.tab')[['scanner','manual','list'].indexOf(t)].classList.toggle('active', t === tab);
+  });
+  if (tab === 'list') renderList();
+  if (tab !== 'scanner' && videoStream) stopCamera();
+}
+
+// ── CAMERA ──
+async function startCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    videoStream = stream;
+    const video = document.getElementById('scanner-video');
+    video.srcObject = stream;
+    document.getElementById('video-container').style.display = 'block';
+    document.getElementById('btn-start-cam').style.display = 'none';
+    document.getElementById('scan-status').textContent = '🔍 Arahkan kamera ke QR tiket tamu...';
+    scanInterval = setInterval(scanFrame, 300);
+  } catch(e) {
+    document.getElementById('scan-status').textContent = '⚠️ Tidak bisa akses kamera. Gunakan tab Manual.';
+  }
+}
+
+function stopCamera() {
+  if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
+  if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
+  document.getElementById('video-container').style.display = 'none';
+  document.getElementById('btn-start-cam').style.display = 'inline-block';
+}
+
+function scanFrame() {
+  const video = document.getElementById('scanner-video');
+  const canvas = document.getElementById('scanner-canvas');
+  if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+  if (code) { clearInterval(scanInterval); processQR(code.data); }
+}
+
+// ── PROCESS QR (async, checks MongoDB) ──
+async function processQR(rawData) {
+  let data;
+  try { data = JSON.parse(rawData); }
+  catch(e) {
+    showScanResult('invalid', '❌', 'QR Tidak Valid', [
+      { label: 'Info', value: 'Format QR tidak dikenali. Pastikan QR dari website Nathan & Ana.' }
+    ]);
+    return;
+  }
+
+  try {
+    // Try to check-in directly — server handles duplicate detection
+    const res = await fetch(API_BASE + '/api/rsvp/checkin/' + encodeURIComponent(data.id), { method: 'PATCH' });
+    const json = await res.json();
+
+    if (res.status === 404) {
+      // Not in DB yet — show confirm so we can register + check-in
+      pendingScanData = data;
+      showScanResult('valid', '✅', 'Tamu Ditemukan!', [
+        { label: 'Nama', value: data.nama || '-' },
+        { label: 'Kehadiran', value: data.hadir || '-' },
+        { label: 'Ticket ID', value: data.id }
+      ], true);
+    } else if (res.status === 409) {
+      const g = json.guest;
+      showScanResult('already', '⚠️', 'Sudah Check-In Sebelumnya', [
+        { label: 'Nama', value: g.nama },
+        { label: 'Check-in pukul', value: g.checkedInAt ? new Date(g.checkedInAt).toLocaleTimeString('id-ID') : '-' },
+        { label: 'Ticket ID', value: g.ticketId }
+      ], false);
+    } else if (res.ok) {
+      const g = json.guest;
+      showScanResult('valid', '🎉', 'Check-In Berhasil!', [
+        { label: 'Nama', value: g.nama },
+        { label: 'Kehadiran', value: g.hadir || 'Hadir' },
+        { label: 'Ticket ID', value: g.ticketId }
+      ], false);
+      showToast('✅ ' + g.nama + ' berhasil check-in!');
+    } else {
+      showScanResult('invalid', '❌', 'Gagal Check-In', [{ label: 'Info', value: json.error || 'Server error.' }]);
+    }
+  } catch(e) {
+    showScanResult('invalid', '❌', 'Tidak Bisa Terhubung ke Server', [
+      { label: 'Info', value: 'Pastikan server berjalan.' }
+    ]);
+  }
+}
+
+function showScanResult(type, icon, status, info, showConfirm) {
+  const card = document.getElementById('scan-result');
+  card.className = 'result-card ' + type;
+  document.getElementById('res-icon').textContent = icon;
+  document.getElementById('res-status').textContent = status;
+  const infoEl = document.getElementById('res-info');
+  infoEl.innerHTML = info.map(i => `<div class="result-row"><strong>${i.label}</strong><span>${i.value}</span></div>`).join('');
+  document.getElementById('btn-confirm-checkin').style.display = showConfirm ? 'inline-block' : 'none';
+  stopCamera();
+}
+
+// Called when guest found in QR but not yet in DB — register + check-in
+async function confirmCheckin() {
+  if (!pendingScanData) return;
+  try {
+    // Register guest first
+    await fetch(API_BASE + '/api/rsvp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ticketId: pendingScanData.id,
+        nama: pendingScanData.nama,
+        hadir: pendingScanData.hadir || 'Hadir'
+      })
+    });
+    // Then check-in
+    await fetch(API_BASE + '/api/rsvp/checkin/' + encodeURIComponent(pendingScanData.id), { method: 'PATCH' });
+    showToast('✅ ' + pendingScanData.nama + ' berhasil check-in!');
+    document.getElementById('res-status').textContent = '🎉 Check-In Berhasil!';
+    document.getElementById('btn-confirm-checkin').style.display = 'none';
+    pendingScanData = null;
+  } catch(e) {
+    showToast('⚠️ Gagal check-in. Cek koneksi server.');
+  }
+}
+
+function resetScan() {
+  document.getElementById('scan-result').className = 'result-card';
+  pendingScanData = null;
+  startCamera();
+}
+
+// ── MANUAL CHECK-IN ──
+async function manualCheckin() {
+  const val = document.getElementById('manual-input').value.trim();
+  if (!val) { showToast('⚠️ Masukkan Ticket ID atau nama tamu!'); return; }
+
+  const card = document.getElementById('manual-result');
+  const icon = document.getElementById('manual-res-icon');
+  const status = document.getElementById('manual-res-status');
+  const info = document.getElementById('manual-res-info');
+
+  try {
+    // Try by ticketId first
+    let res = await fetch(API_BASE + '/api/rsvp/checkin/' + encodeURIComponent(val), { method: 'PATCH' });
+    let json = await res.json();
+
+    // If not found by ticketId, try by name
+    if (res.status === 404) {
+      res = await fetch(API_BASE + '/api/rsvp/checkin-name', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nama: val })
+      });
+      json = await res.json();
+    }
+
+    if (res.status === 404) {
+      card.className = 'result-card invalid';
+      icon.textContent = '❌'; status.textContent = 'Tamu Tidak Ditemukan';
+      info.innerHTML = `<div class="result-row"><strong>Input</strong><span>${val}</span></div><div class="result-row"><strong>Info</strong><span>Tamu belum RSVP atau ID salah.</span></div>`;
+    } else if (res.status === 409) {
+      const g = json.guest;
+      card.className = 'result-card already';
+      icon.textContent = '⚠️'; status.textContent = 'Sudah Check-In';
+      info.innerHTML = `<div class="result-row"><strong>Nama</strong><span>${g.nama}</span></div><div class="result-row"><strong>Check-in</strong><span>${g.checkedInAt ? new Date(g.checkedInAt).toLocaleTimeString('id-ID') : '-'}</span></div>`;
+    } else if (res.ok) {
+      const g = json.guest;
+      card.className = 'result-card valid';
+      icon.textContent = '✅'; status.textContent = (g.nama || val) + ' — Check-In Berhasil!';
+      info.innerHTML = `<div class="result-row"><strong>Nama</strong><span>${g.nama}</span></div><div class="result-row"><strong>Ticket ID</strong><span>${g.ticketId}</span></div><div class="result-row"><strong>Pukul</strong><span>${new Date().toLocaleTimeString('id-ID')}</span></div>`;
+      document.getElementById('manual-input').value = '';
+      showToast('✅ ' + g.nama + ' berhasil check-in!');
+    }
+  } catch(e) {
+    showToast('⚠️ Tidak dapat terhubung ke server.');
+  }
+}
+
+// ── GUEST LIST ──
+async function renderList() {
+  const search = document.getElementById('list-search').value.toLowerCase();
+  const container = document.getElementById('guest-list-container');
+
+  try {
+    const res = await fetch(API_BASE + '/api/rsvp');
+    const guests = await res.json();
+    const filtered = guests.filter(g => g.nama.toLowerCase().includes(search));
+
+    const total = guests.length;
+    const checked = guests.filter(g => g.checkedIn).length;
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-checked').textContent = checked;
+    document.getElementById('stat-pending').textContent = total - checked;
+
+    if (!filtered.length) {
+      container.innerHTML = '<div class="empty-state"><div>' + (guests.length ? '🔍' : '👥') + '</div><p>' + (guests.length ? 'Tidak ada hasil.' : 'Belum ada tamu RSVP.') + '</p></div>';
+      return;
+    }
+
+    container.innerHTML = `
+      <table class="guest-table">
+        <thead><tr>
+          <th>Nama</th><th>Status RSVP</th><th>Check-In</th><th>Aksi</th>
+        </tr></thead>
+        <tbody>
+          ${filtered.map(g => `
+            <tr>
+              <td><strong>${g.nama}</strong><br><span style="font-size:0.72rem;color:var(--muted);">${g.ticketId}</span></td>
+              <td><span class="badge ${g.hadir === 'Hadir' ? 'hadir' : 'tidak'}">${g.hadir || '-'}</span></td>
+              <td>${g.checkedIn
+                ? `<span class="badge checkedin">✅ Hadir</span><br><span style="font-size:0.7rem;color:var(--muted);">${new Date(g.checkedInAt).toLocaleTimeString('id-ID')}</span>`
+                : `<span class="badge waiting">⏳ Belum</span>`}
+              </td>
+              <td>${g.checkedIn
+                ? `<button class="btn-undo" onclick="undoCheckin('${g.ticketId}')">↩ Undo</button>`
+                : `<button class="btn-checkin-manual" onclick="quickCheckin('${g.ticketId}')">✅ Check-In</button>`}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state"><div>⚠️</div><p>Tidak dapat terhubung ke server.</p></div>';
+  }
+}
+
+async function quickCheckin(ticketId) {
+  try {
+    const res = await fetch(API_BASE + '/api/rsvp/checkin/' + encodeURIComponent(ticketId), { method: 'PATCH' });
+    const json = await res.json();
+    if (res.ok) { showToast('✅ ' + json.guest.nama + ' berhasil check-in!'); renderList(); }
+    else if (res.status === 409) showToast('⚠️ Tamu sudah check-in sebelumnya.');
+    else showToast('⚠️ Gagal check-in.');
+  } catch(e) { showToast('⚠️ Tidak dapat terhubung ke server.'); }
+}
+
+async function undoCheckin(ticketId) {
+  try {
+    await fetch(API_BASE + '/api/rsvp/undo/' + encodeURIComponent(ticketId), { method: 'PATCH' });
+    showToast('↩ Check-in dibatalkan');
+    renderList();
+  } catch(e) { showToast('⚠️ Gagal undo.'); }
+}
+
+async function clearCheckins() {
+  try {
+    await fetch(API_BASE + '/api/rsvp/checkins', { method: 'DELETE' });
+    showToast('🗑️ Semua check-in direset');
+    renderList();
+  } catch(e) { showToast('⚠️ Gagal reset.'); }
+}
+
+async function exportCSV() {
+  try {
+    const res = await fetch(API_BASE + '/api/rsvp');
+    const guests = await res.json();
+    if (!guests.length) { showToast('⚠️ Belum ada data!'); return; }
+    const rows = [['Nama','Ticket ID','RSVP','Check-In','Waktu Check-In']];
+    guests.forEach(g => rows.push([
+      g.nama, g.ticketId, g.hadir || '-',
+      g.checkedIn ? 'Ya' : 'Tidak',
+      g.checkedInAt ? new Date(g.checkedInAt).toLocaleString('id-ID') : '-'
+    ]));
+    const csv = rows.map(r => r.map(c => '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+    const link = document.createElement('a');
+    link.download = 'checkin-nathan-ana.csv';
+    link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    link.click();
+    showToast('📊 CSV berhasil diexport!');
+  } catch(e) { showToast('⚠️ Gagal export.'); }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// Init
+renderList();
+</script>
+</body>
+</html>
