@@ -15,7 +15,36 @@
 html{scroll-behavior:smooth;}
 body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--dark);overflow-x:hidden;}
 
-/* NAV */
+/* ── ENVELOPE OPENING ── */
+#envelope-screen{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1a0a0a 0%,#3d1020 60%,#1a0a0a 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity 0.9s ease;}
+#envelope-screen.hide{opacity:0;pointer-events:none;}
+.env-to{color:rgba(255,255,255,0.5);font-size:0.78rem;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:0.5rem;font-family:'Jost',sans-serif;}
+.env-guest{color:#fff;font-family:'Playfair Display',serif;font-size:clamp(1.6rem,5vw,2.8rem);text-align:center;margin-bottom:2.5rem;text-shadow:0 2px 20px rgba(232,41,74,0.4);}
+.envelope-wrap{position:relative;width:280px;height:200px;cursor:pointer;filter:drop-shadow(0 20px 60px rgba(232,41,74,0.3));}
+.envelope-wrap:hover .env-flap{transform:rotateX(180deg);}
+.env-body{position:absolute;inset:0;background:linear-gradient(135deg,#c9a96e,#e8c88a);border-radius:4px 4px 12px 12px;}
+.env-body::before{content:'';position:absolute;bottom:0;left:0;right:0;height:60%;background:linear-gradient(to top,#b8954a,#c9a96e);border-radius:0 0 12px 12px;}
+.env-left{position:absolute;bottom:0;left:0;width:0;height:0;border-style:solid;border-width:100px 0 0 140px;border-color:transparent transparent transparent #a07c3a;}
+.env-right{position:absolute;bottom:0;right:0;width:0;height:0;border-style:solid;border-width:100px 140px 0 0;border-color:transparent #a07c3a transparent transparent;}
+.env-flap{position:absolute;top:0;left:0;right:0;height:0;border-style:solid;border-width:100px 140px 0 140px;border-color:#b8954a transparent transparent transparent;transform-origin:top center;transform-style:preserve-3d;transition:transform 0.6s ease;border-radius:4px 4px 0 0;}
+.env-letter{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.env-letter-icon{font-size:2.5rem;display:block;animation:hb 1.5s ease infinite;}
+.env-open-btn{margin-top:2.5rem;padding:1rem 2.5rem;background:var(--rose);color:#fff;border:none;border-radius:50px;font-family:'Jost',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;letter-spacing:0.08em;box-shadow:0 8px 30px rgba(232,41,74,0.5);animation:pulse-btn 2s ease infinite;}
+@keyframes pulse-btn{0%,100%{box-shadow:0 8px 30px rgba(232,41,74,0.5);}50%{box-shadow:0 8px 50px rgba(232,41,74,0.8);}}
+.env-sub{color:rgba(255,255,255,0.45);font-size:0.78rem;margin-top:0.8rem;font-family:'Jost',sans-serif;}
+
+/* ── SCROLL ANIMATIONS ── */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-left{opacity:0;transform:translateX(-40px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal-left.visible{opacity:1;transform:translateX(0);}
+.reveal-right{opacity:0;transform:translateX(40px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal-right.visible{opacity:1;transform:translateX(0);}
+.reveal-delay-1{transition-delay:0.1s;}
+.reveal-delay-2{transition-delay:0.2s;}
+.reveal-delay-3{transition-delay:0.3s;}
+.reveal-delay-4{transition-delay:0.4s;}
+
 nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:center;gap:2rem;padding:1rem 2rem;background:rgba(0,0,0,0.35);backdrop-filter:blur(8px);}
 nav a{color:rgba(255,255,255,0.85);text-decoration:none;font-size:0.8rem;letter-spacing:0.12em;text-transform:uppercase;font-weight:500;transition:color 0.2s;}
 nav a:hover{color:#fff;}
@@ -48,51 +77,26 @@ nav a:hover{color:#fff;}
 .cd-num{font-family:'Playfair Display',serif;font-size:3.5rem;color:var(--rose);line-height:1;font-weight:700;display:block;}
 .cd-label{font-size:0.7rem;letter-spacing:0.18em;color:var(--muted);margin-top:0.4rem;text-transform:uppercase;font-weight:500;}
 
-/* GOOGLE FORM RSVP */
+/* RSVP */
 #rsvp{background:linear-gradient(rgba(253,248,245,0.92),rgba(253,248,245,0.92)),url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1600&q=80') center/cover;}
-.gform-wrap{max-width:700px;margin:0 auto;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(232,41,74,0.1);}
-.gform-wrap iframe{width:100%;height:900px;border:none;display:block;}
-.gform-fallback{background:#fff;border-radius:20px;padding:2.5rem;text-align:center;box-shadow:0 8px 40px rgba(232,41,74,0.1);}
-.gform-fallback p{color:var(--muted);margin-bottom:1.5rem;line-height:1.7;}
-.btn-gform{display:inline-flex;align-items:center;gap:0.5rem;padding:1rem 2rem;background:var(--rose);color:#fff;border-radius:12px;text-decoration:none;font-weight:500;font-size:1rem;transition:background 0.2s,transform 0.15s;}
-.btn-gform:hover{background:#cc1e3a;transform:translateY(-2px);}
 
 /* GREETING WALL */
 #greetings{background:var(--rose-light);}
-.greeting-input-box{max-width:600px;margin:0 auto 2rem;background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 4px 20px rgba(232,41,74,0.08);}
-.greeting-input-box input,.greeting-input-box textarea{width:100%;padding:0.7rem 1rem;border:1.5px solid #e8ddd8;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.92rem;outline:none;margin-bottom:0.8rem;transition:border-color 0.2s;}
+.greeting-input-box{max-width:540px;margin:0 auto 2.5rem;background:#fff;border-radius:16px;padding:1.8rem;box-shadow:0 4px 20px rgba(232,41,74,0.08);}
+.greeting-input-box input,.greeting-input-box textarea{width:100%;padding:0.8rem 1rem;border:1.5px solid #e8ddd8;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.92rem;outline:none;margin-bottom:0.8rem;}
 .greeting-input-box input:focus,.greeting-input-box textarea:focus{border-color:var(--rose);}
 .greeting-input-box textarea{resize:vertical;min-height:80px;}
-.btn-greet{width:100%;padding:0.85rem;background:var(--rose);color:#fff;border:none;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.95rem;font-weight:500;cursor:pointer;transition:background 0.2s;}
+.btn-greet{width:100%;padding:0.85rem;background:var(--rose);color:#fff;border:none;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;transition:background 0.2s;}
 .btn-greet:hover{background:#cc1e3a;}
-.greetings-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;max-width:1000px;margin:0 auto;}
-.greet-card{background:#fff;border-radius:14px;padding:1.4rem;box-shadow:0 2px 16px rgba(232,41,74,0.07);animation:fadeUp 0.5s ease;}
-.greet-name{font-weight:600;font-size:0.92rem;color:var(--rose);margin-bottom:0.4rem;}
-.greet-msg{font-size:0.9rem;color:#4a4040;line-height:1.6;font-style:italic;}
-.greet-time{font-size:0.72rem;color:#bbb;margin-top:0.5rem;}
-.no-greetings{text-align:center;color:var(--muted);font-style:italic;padding:2rem;grid-column:1/-1;}
-
-/* QR GENERATOR */
-#qr-gen{background:#fff;}
-.qr-box{max-width:560px;margin:0 auto;}
-.qr-input-row{display:flex;gap:0.8rem;margin-bottom:1.5rem;}
-.qr-input-row input{flex:1;padding:0.85rem 1rem;border:1.5px solid #e8ddd8;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.95rem;outline:none;transition:border-color 0.2s;}
-.qr-input-row input:focus{border-color:var(--rose);}
-.btn-qr{padding:0.85rem 1.4rem;background:var(--rose);color:#fff;border:none;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.92rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:background 0.2s;}
-.btn-qr:hover{background:#cc1e3a;}
-.qr-result{display:none;background:var(--rose-light);border-radius:16px;padding:2rem;text-align:center;}
-.qr-result.show{display:block;animation:fadeUp 0.4s ease;}
-#qr-canvas{display:inline-block;background:#fff;padding:1rem;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);margin-bottom:1rem;}
-.qr-guest-name{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--dark);margin-bottom:0.3rem;}
-.qr-sub{font-size:0.85rem;color:var(--muted);margin-bottom:1rem;}
-.btn-dl{display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.5rem;background:var(--rose);color:#fff;border:none;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.88rem;font-weight:500;cursor:pointer;transition:background 0.2s;}
-.btn-dl:hover{background:#cc1e3a;}
-.qr-list{margin-top:2rem;}
-.qr-list-title{font-weight:600;font-size:0.9rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:1rem;text-align:center;}
-.qr-list-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.8rem;}
-.qr-list-item{background:var(--rose-light);border-radius:10px;padding:0.8rem 1rem;display:flex;align-items:center;justify-content:space-between;font-size:0.88rem;}
-.qr-list-item span{font-weight:500;color:var(--dark);}
-.btn-qr-view{background:none;border:none;color:var(--rose);cursor:pointer;font-size:0.8rem;font-weight:600;text-decoration:underline;}
+.greetings-wall{overflow:hidden;position:relative;width:100%;padding:1rem 0;}
+.greetings-track{display:flex;gap:1.5rem;width:max-content;animation:marquee 30s linear infinite;}
+.greetings-track:hover{animation-play-state:paused;}
+.greet-card{background:#fff;border-radius:14px;padding:1.2rem 1.5rem;box-shadow:0 2px 16px rgba(232,41,74,0.08);min-width:260px;max-width:300px;flex-shrink:0;}
+.greet-name{font-weight:600;font-size:0.9rem;color:var(--rose);margin-bottom:0.4rem;}
+.greet-msg{font-size:0.88rem;color:var(--dark);line-height:1.5;font-style:italic;margin-bottom:0.5rem;}
+.greet-time{font-size:0.72rem;color:var(--muted);}
+.no-greetings{text-align:center;color:var(--muted);padding:2rem;font-size:0.9rem;}
+@keyframes marquee{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
 
 /* VENUE */
 #venue{background:var(--rose-light);}
@@ -111,19 +115,51 @@ footer{background:var(--dark);color:rgba(255,255,255,0.45);text-align:center;pad
 footer .ft-names{font-family:'Playfair Display',serif;font-size:1.1rem;color:rgba(255,255,255,0.75);margin-bottom:0.4rem;}
 footer span{color:var(--rose);}
 
+/* VINYL PLAYER */
+.vinyl-player{position:fixed;bottom:1.5rem;left:1.5rem;z-index:998;display:flex;align-items:center;gap:0.8rem;cursor:pointer;}
+.vinyl-wrap{position:relative;width:64px;height:64px;}
+.vinyl-disc{width:64px;height:64px;border-radius:50%;background:
+  radial-gradient(circle at center,#222 18%,transparent 18%),
+  radial-gradient(circle at center,#444 19%,transparent 19%),
+  repeating-radial-gradient(circle at center,#1a1a1a 0px,#2a2a2a 2px,#1a1a1a 4px);
+  box-shadow:0 4px 20px rgba(0,0,0,0.4);
+  animation:spin 4s linear infinite;
+  animation-play-state:paused;
+  border:3px solid #333;
+}
+.vinyl-disc.playing{animation-play-state:running;}
+.vinyl-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:18px;height:18px;border-radius:50%;
+  background:radial-gradient(circle,var(--rose) 0%,#c41e3a 100%);
+  box-shadow:0 0 0 3px #fff,0 0 0 4px #ddd;
+}
+.vinyl-label{background:rgba(26,16,16,0.85);backdrop-filter:blur(8px);
+  color:#fff;border-radius:30px;padding:0.4rem 0.9rem;
+  font-size:0.72rem;font-family:'Jost',sans-serif;font-weight:500;
+  white-space:nowrap;max-width:160px;overflow:hidden;
+  box-shadow:0 2px 12px rgba(0,0,0,0.3);
+}
+.vinyl-icon{font-size:0.8rem;margin-right:0.3rem;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
 /* TOAST */
 .toast{position:fixed;bottom:2rem;right:2rem;background:#1a1010;color:#fff;padding:1rem 1.5rem;border-radius:12px;font-size:0.9rem;box-shadow:0 8px 30px rgba(0,0,0,0.2);transform:translateY(100px);opacity:0;transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);z-index:999;}
 .toast.show{transform:translateY(0);opacity:1;}
 
-@keyframes slideDown {
-  from { transform: translateY(-100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
+/* BANNER */
+@keyframes slideDown{from{transform:translateY(-100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+/* FORM STYLES */
+.form-label{display:block;font-size:0.88rem;font-weight:600;margin-bottom:0.4rem;color:var(--dark);}
+.form-select,.form-input{width:100%;padding:0.8rem 1rem;border:1.5px solid #e8ddd8;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.92rem;outline:none;background:#fff;transition:border-color 0.2s;}
+.form-select:focus,.form-input:focus{border-color:var(--rose);}
+.form-textarea{width:100%;padding:0.8rem 1rem;border:1.5px solid #e8ddd8;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.92rem;outline:none;resize:vertical;min-height:80px;transition:border-color 0.2s;}
+.form-textarea:focus{border-color:var(--rose);}
+
 @media(max-width:700px){
   .venue-grid{grid-template-columns:1fr;}
   .cd-card{min-width:100px;padding:1.5rem 1rem 1rem;}
   .cd-num{font-size:2.5rem;}
-  .qr-input-row{flex-direction:column;}
   nav{gap:1rem;padding:0.75rem 1rem;}
   nav a{font-size:0.7rem;}
 }
@@ -131,18 +167,51 @@ footer span{color:var(--rose);}
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-<!-- Guest personalization banner -->
+<!-- ENVELOPE OPENING SCREEN -->
+<div id="envelope-screen">
+  <div class="env-to">Undangan Pernikahan untuk</div>
+  <div class="env-guest" id="env-guest-name">Tamu Undangan</div>
+  <div class="envelope-wrap" onclick="openEnvelope()">
+    <div class="env-body"></div>
+    <div class="env-left"></div>
+    <div class="env-right"></div>
+    <div class="env-flap"></div>
+    <div class="env-letter">
+      <span class="env-letter-icon">💌</span>
+    </div>
+  </div>
+  <button class="env-open-btn" onclick="openEnvelope()">💌 Buka Undangan</button>
+  <div class="env-sub">Klik untuk membuka undangan</div>
+</div>
+
+<!-- AUDIO -->
+<audio id="bg-music" loop preload="auto">
+  <source src="/music.mp3" type="audio/mpeg"/>
+</audio>
+
+<!-- VINYL PLAYER -->
+<div class="vinyl-player" onclick="toggleMusic()" title="Play / Pause musik">
+  <div class="vinyl-wrap">
+    <div class="vinyl-disc" id="vinyl-disc"></div>
+    <div class="vinyl-center"></div>
+  </div>
+  <div class="vinyl-label">
+    <span class="vinyl-icon" id="vinyl-icon">▶️</span>Trust in God
+  </div>
+</div>
+
+<!-- GUEST BANNER -->
 <div id="guest-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:linear-gradient(135deg,var(--rose),#c41e3a);color:#fff;text-align:center;padding:0.7rem 1rem;font-size:0.9rem;font-weight:500;box-shadow:0 2px 12px rgba(232,41,74,0.3);animation:slideDown 0.5s ease;">
-  🎉 Halo, <span id="guest-banner-name" style="font-weight:700;"></span>! Selamat datang di undangan pernikahan Nathan & Ana 💍
+  🎉 Halo, <span id="guest-banner-name" style="font-weight:700;"></span>! Selamat datang di undangan pernikahan Nathan &amp; Ana 💍
   <button onclick="document.getElementById('guest-banner').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;margin-left:1rem;font-size:1rem;">✕</button>
 </div>
+
+<!-- NAV -->
+<nav>
   <a href="#hero">Home</a>
   <a href="#countdown">Countdown</a>
   <a href="#rsvp">RSVP</a>
   <a href="#greetings">Ucapan</a>
-  <a href="#qr-gen">QR Tamu</a>
   <a href="#venue">Venue</a>
 </nav>
 
@@ -161,164 +230,123 @@ footer span{color:var(--rose);}
   </div>
 </section>
 
-<!-- PERSONAL QR TICKET (only shown when ?tamu= param exists) -->
-<section id="personal-qr-section" style="display:none;padding:4rem 2rem;background:linear-gradient(135deg,#fff 0%,var(--rose-light) 100%);">
-  <div style="max-width:480px;margin:0 auto;text-align:center;">
-    <div style="font-size:1.6rem;margin-bottom:0.3rem;">🎫</div>
-    <h2 style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;margin-bottom:0.3rem;">Tiket Undangan Kamu</h2>
-    <p style="color:var(--muted);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem;margin-bottom:2rem;">Screenshot atau download QR ini sebagai tiket masuk</p>
-
-    <div style="display:inline-block;background:#fff;border:2px solid var(--rose-light);border-radius:20px;padding:2rem;box-shadow:0 8px 40px rgba(232,41,74,0.1);">
-      <!-- Top header -->
-      <div style="background:var(--rose);border-radius:12px;padding:0.8rem 1.5rem;margin-bottom:1.2rem;">
-        <p style="font-family:'Playfair Display',serif;font-size:1.1rem;color:#fff;font-weight:700;">Nathan &amp; Ana</p>
-        <p style="font-size:0.75rem;color:rgba(255,255,255,0.85);">26 December 2026 · GSJS Pakuwon Mall</p>
-      </div>
-
-      <!-- QR Code -->
-      <div id="personal-qr-canvas" style="display:flex;justify-content:center;margin-bottom:1.2rem;"></div>
-
-      <!-- Guest name -->
-      <p style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--dark);" id="personal-qr-name"></p>
-      <p style="font-size:0.8rem;color:var(--muted);margin-top:0.2rem;">Tamu Undangan</p>
-
-      <!-- Dashed divider -->
-      <div style="border-top:2px dashed #e8ddd8;margin:1rem 0;"></div>
-
-      <p style="font-size:0.72rem;color:#bbb;font-family:monospace;" id="personal-qr-id"></p>
-    </div>
-
-    <div style="margin-top:1.5rem;display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap;">
-      <button id="btn-download-personal-qr"
-        style="padding:0.85rem 1.5rem;background:var(--rose);color:#fff;border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;transition:all 0.2s;"
-        onmouseover="this.style.background='#cc1e3a'" onmouseout="this.style.background='var(--rose)'">
-        ⬇️ Download Tiket QR
-      </button>
-    </div>
-    <p style="margin-top:1rem;font-size:0.8rem;color:var(--muted);">💡 Tunjukkan QR ini kepada panitia saat tiba di venue</p>
-  </div>
-</section>
-
 <!-- COUNTDOWN -->
 <section id="countdown" class="sec">
-  <div class="sec-head">
+  <div class="sec-head reveal">
     <div class="sec-eyebrow">📅</div>
     <h2 class="sec-title">Counting Down</h2>
     <p class="sec-sub">Until we say "I do"</p>
   </div>
   <div class="cd-grid">
-    <div class="cd-card"><span class="cd-num" id="cd-d">00</span><div class="cd-label">Days</div></div>
-    <div class="cd-card"><span class="cd-num" id="cd-h">00</span><div class="cd-label">Hours</div></div>
-    <div class="cd-card"><span class="cd-num" id="cd-m">00</span><div class="cd-label">Minutes</div></div>
-    <div class="cd-card"><span class="cd-num" id="cd-s">00</span><div class="cd-label">Seconds</div></div>
+    <div class="cd-card reveal reveal-delay-1"><span class="cd-num" id="cd-d">00</span><div class="cd-label">Days</div></div>
+    <div class="cd-card reveal reveal-delay-2"><span class="cd-num" id="cd-h">00</span><div class="cd-label">Hours</div></div>
+    <div class="cd-card reveal reveal-delay-3"><span class="cd-num" id="cd-m">00</span><div class="cd-label">Minutes</div></div>
+    <div class="cd-card reveal reveal-delay-4"><span class="cd-num" id="cd-s">00</span><div class="cd-label">Seconds</div></div>
   </div>
 </section>
 
-<!-- RSVP - Auto QR on Submit -->
+<!-- RSVP -->
 <section id="rsvp" class="sec">
-  <div class="sec-head">
+  <div class="sec-head reveal">
     <div class="sec-eyebrow">✉️</div>
     <h2 class="sec-title">RSVP</h2>
     <p class="sec-sub">We can't wait to celebrate with you!</p>
   </div>
 
   <div style="max-width:580px;margin:0 auto;">
-    <!-- STEP 1: FORM -->
-    <div id="rsvp-step-form" style="background:#fff;border-radius:20px;padding:2.5rem 2rem;box-shadow:0 8px 40px rgba(232,41,74,0.09);">
-      <form name="rsvp" id="rsvp-form" data-netlify="true" netlify-honeypot="bot-field" method="POST">
-        <input type="hidden" name="form-name" value="rsvp"/>
-        <input type="hidden" name="ticket-id" id="hidden-ticket-id"/>
-        <p style="display:none"><input name="bot-field"/></p>
 
-        <div style="margin-bottom:1.2rem;">
-          <label style="display:block;font-size:0.88rem;font-weight:600;margin-bottom:0.4rem;">👤 Nama Lengkap <span style="color:var(--rose)">*</span></label>
-          <input name="nama" id="f-nama" type="text" required placeholder="Masukkan nama lengkap kamu"
-            style="width:100%;padding:0.8rem 1rem;border:1.5px solid #e8ddd8;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.92rem;outline:none;"
-            onfocus="this.style.borderColor='var(--rose)'" onblur="this.style.borderColor='#e8ddd8'"/>
-        </div>
-
-        <div style="margin-bottom:1.2rem;">
-          <label style="display:block;font-size:0.88rem;font-weight:600;margin-bottom:0.4rem;">📧 Email <span style="color:var(--rose)">*</span></label>
-          <input name="email" id="f-email" type="email" required placeholder="Masukkan email kamu"
-            style="width:100%;padding:0.8rem 1rem;border:1.5px solid #e8ddd8;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.92rem;outline:none;"
-            onfocus="this.style.borderColor='var(--rose)'" onblur="this.style.borderColor='#e8ddd8'"/>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem;">
-          <div>
-            <label style="display:block;font-size:0.88rem;font-weight:600;margin-bottom:0.4rem;">🎉 Kehadiran <span style="color:var(--rose)">*</span></label>
-            <select name="hadir" id="f-hadir" required
-              style="width:100%;padding:0.8rem 1rem;border:1.5px solid #e8ddd8;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.92rem;outline:none;background:#fff;"
-              onfocus="this.style.borderColor='var(--rose)'" onblur="this.style.borderColor='#e8ddd8'">
-              <option value="">Pilih...</option>
-              <option value="Hadir">✅ Pasti Hadir</option>
-              <option value="Tidak Hadir">❌ Tidak Hadir</option>
-            </select>
-          </div>
-          <div>
-            <label style="display:block;font-size:0.88rem;font-weight:600;margin-bottom:0.4rem;">👥 Jumlah Tamu</label>
-            <select name="jumlah"
-              style="width:100%;padding:0.8rem 1rem;border:1.5px solid #e8ddd8;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.92rem;outline:none;background:#fff;">
-              <option value="1">1 orang</option>
-              <option value="2">2 orang</option>
-              <option value="3">3 orang</option>
-              <option value="4">4 orang</option>
-            </select>
-          </div>
-        </div>
-
-        <div style="margin-bottom:1.2rem;">
-          <label style="display:block;font-size:0.88rem;font-weight:600;margin-bottom:0.4rem;">🍽️ Pantangan Makanan</label>
-          <input name="pantangan" type="text" placeholder="Alergi atau pantangan makanan"
-            style="width:100%;padding:0.8rem 1rem;border:1.5px solid #e8ddd8;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.92rem;outline:none;"
-            onfocus="this.style.borderColor='var(--rose)'" onblur="this.style.borderColor='#e8ddd8'"/>
-        </div>
-
-        <div style="margin-bottom:1.5rem;">
-          <label style="display:block;font-size:0.88rem;font-weight:600;margin-bottom:0.4rem;">💌 Ucapan untuk Pengantin</label>
-          <textarea name="ucapan" rows="3" placeholder="Tuliskan ucapan atau doa untuk Nathan & Ana..."
-            style="width:100%;padding:0.8rem 1rem;border:1.5px solid #e8ddd8;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.92rem;outline:none;resize:vertical;"></textarea>
-        </div>
-
-        <button type="button" onclick="submitRSVP()"
-          style="width:100%;padding:1rem;background:var(--rose);color:#fff;border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.2s;"
-          onmouseover="this.style.background='#cc1e3a'" onmouseout="this.style.background='var(--rose)'">
-          ✉️ Kirim RSVP
-        </button>
-      </form>
+    <!-- STATE: No param (locked) -->
+    <div id="rsvp-locked" style="display:none;background:#fff;border-radius:20px;padding:3rem 2rem;box-shadow:0 8px 40px rgba(232,41,74,0.09);text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:0.8rem;">🔒</div>
+      <h3 style="font-family:'Playfair Display',serif;color:var(--rose);font-size:1.4rem;margin-bottom:0.5rem;">Undangan Personal</h3>
+      <p style="color:var(--muted);font-size:0.9rem;line-height:1.7;">Halaman RSVP ini hanya bisa diakses melalui link undangan personal yang dikirimkan langsung kepada kamu. Jika belum menerima link, silakan hubungi panitia.</p>
     </div>
 
-    <!-- STEP 2: QR RESULT (shown after submit) -->
-    <div id="rsvp-step-qr" style="display:none;background:#fff;border-radius:20px;padding:2.5rem 2rem;box-shadow:0 8px 40px rgba(232,41,74,0.09);text-align:center;">
+    <!-- STATE: Form -->
+    <div id="rsvp-form" style="display:none;background:#fff;border-radius:20px;padding:2.5rem 2rem;box-shadow:0 8px 40px rgba(232,41,74,0.09);">
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <div style="font-size:1.4rem;margin-bottom:0.3rem;">✉️</div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--rose);margin-bottom:0.3rem;">Konfirmasi Kehadiran</h3>
+        <p style="color:var(--muted);font-size:0.85rem;">Halo, <strong id="rsvp-guest-name"></strong>! Mohon isi konfirmasi di bawah ini.</p>
+      </div>
+
+      <!-- Guest name display -->
+      <div style="background:var(--cream);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.8rem;">
+        <span style="font-size:1.2rem;">👤</span>
+        <div>
+          <div style="font-size:0.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Nama Tamu</div>
+          <div style="font-weight:700;font-size:1.05rem;" id="rsvp-name-display"></div>
+        </div>
+      </div>
+
+      <!-- Kehadiran -->
+      <div style="margin-bottom:1.2rem;">
+        <label class="form-label">🎉 Kehadiran <span style="color:var(--rose)">*</span></label>
+        <select id="f-hadir" class="form-select" onchange="onHadirChange()">
+          <option value="">Pilih kehadiran...</option>
+          <option value="Hadir">✅ Pasti Hadir</option>
+          <option value="Tidak Hadir">❌ Tidak Hadir</option>
+        </select>
+      </div>
+
+      <!-- Jumlah (hanya jika hadir) -->
+      <div id="jumlah-section" style="margin-bottom:1.2rem;display:none;">
+        <label class="form-label">👥 Jumlah Orang yang Hadir <span style="color:var(--rose)">*</span></label>
+        <select id="f-jumlah" class="form-select">
+          <option value="1">1 orang</option>
+          <option value="2">2 orang (max)</option>
+        </select>
+        <p style="font-size:0.78rem;color:var(--muted);margin-top:0.4rem;">⚠️ Maksimal 2 orang per undangan</p>
+      </div>
+
+      <!-- Alergi/Pantangan (hanya jika hadir) -->
+      <div id="alergi-section" style="margin-bottom:1.5rem;display:none;">
+        <label class="form-label">🍽️ Alergi / Pantangan Makanan</label>
+        <textarea id="f-alergi" class="form-textarea" placeholder="Contoh: alergi seafood, tidak makan daging babi, vegetarian, dll. Kosongkan jika tidak ada."></textarea>
+      </div>
+
+      <button type="button" onclick="submitRSVP()"
+        style="width:100%;padding:1rem;background:var(--rose);color:#fff;border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.2s;"
+        onmouseover="this.style.background='#cc1e3a'" onmouseout="this.style.background='var(--rose)'">
+        ✉️ Kirim Konfirmasi
+      </button>
+    </div>
+
+    <!-- STATE: Tidak Hadir confirmation -->
+    <div id="rsvp-tidak-hadir" style="display:none;background:#fff;border-radius:20px;padding:2.5rem 2rem;box-shadow:0 8px 40px rgba(232,41,74,0.09);text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:0.5rem;">💌</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--muted);margin-bottom:0.5rem;">Terima Kasih Sudah Merespons</h3>
+      <p style="color:var(--muted);font-size:0.9rem;line-height:1.7;">Kami memahami jika kamu tidak bisa hadir. Doa dan ucapan kamu tetap sangat berarti bagi kami. 🙏</p>
+      <div style="margin-top:1.5rem;">
+        <a href="#greetings" style="display:inline-block;padding:0.85rem 2rem;background:var(--rose);color:#fff;border-radius:10px;text-decoration:none;font-weight:600;font-size:0.95rem;">💬 Kirim Ucapan</a>
+      </div>
+    </div>
+
+    <!-- STATE: QR Ticket (setelah submit & hadir) -->
+    <div id="rsvp-qr" style="display:none;background:#fff;border-radius:20px;padding:2.5rem 2rem;box-shadow:0 8px 40px rgba(232,41,74,0.09);text-align:center;">
       <div style="font-size:2.5rem;margin-bottom:0.5rem;">🎉</div>
       <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--rose);margin-bottom:0.3rem;">RSVP Diterima!</h3>
       <p style="color:var(--muted);font-size:0.9rem;margin-bottom:1.5rem;">Ini adalah tiket masuk unik kamu. Screenshot atau download QR ini ya!</p>
 
-      <!-- QR Card Preview -->
-      <div id="qr-ticket-preview" style="display:inline-block;background:var(--cream);border:2px solid var(--rose-light);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;">
+      <div id="qr-ticket-card" style="display:inline-block;background:var(--cream);border:2px solid var(--rose-light);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;">
         <p style="font-family:'Playfair Display',serif;font-size:0.9rem;color:var(--rose);margin-bottom:0.3rem;">Nathan &amp; Ana Wedding</p>
         <p style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem;">26 December 2026 · GSJS Pakuwon Mall</p>
         <div id="rsvp-qr-canvas" style="display:flex;justify-content:center;margin-bottom:1rem;"></div>
         <p style="font-weight:700;font-size:1.1rem;" id="qr-ticket-name"></p>
         <p style="font-size:0.75rem;color:var(--muted);">Tamu Undangan</p>
-        <p style="font-size:0.7rem;color:#ddd;margin-top:0.5rem;" id="qr-ticket-id"></p>
+        <div style="border-top:2px dashed #e8ddd8;margin:0.8rem 0;"></div>
+        <p style="font-size:0.7rem;color:#bbb;font-family:monospace;" id="qr-ticket-id"></p>
       </div>
 
       <div style="display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap;">
-        <button onclick="downloadTicketQR()"
+        <button onclick="downloadRSVPQR()"
           style="padding:0.85rem 1.5rem;background:var(--rose);color:#fff;border:none;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;">
           ⬇️ Download QR Tiket
         </button>
-        <button onclick="document.getElementById('rsvp-step-qr').style.display='none';document.getElementById('rsvp-step-form').style.display='block';"
-          style="padding:0.85rem 1.5rem;background:var(--rose-light);color:var(--rose);border:none;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;">
-          ← Kembali
-        </button>
       </div>
-
-      <p style="margin-top:1rem;font-size:0.8rem;color:var(--muted);">
-        💡 Tunjukkan QR ini kepada panitia saat tiba di venue
-      </p>
+      <p style="margin-top:1rem;font-size:0.8rem;color:var(--muted);">💡 Tunjukkan QR ini kepada panitia saat tiba di venue</p>
     </div>
+
   </div>
 </section>
 
@@ -326,47 +354,18 @@ footer span{color:var(--rose);}
 <section id="greetings" class="sec">
   <div class="sec-head">
     <div class="sec-eyebrow">💬</div>
-    <h2 class="sec-title">Ucapan & Doa</h2>
+    <h2 class="sec-title">Ucapan &amp; Doa</h2>
     <p class="sec-sub">Tinggalkan ucapan untuk Nathan &amp; Ana</p>
   </div>
 
   <div class="greeting-input-box">
-    <input type="text" id="g-name" placeholder="Nama kamu *" maxlength="60"/>
-    <textarea id="g-msg" placeholder="Tulis ucapan atau doa untuk pasangan..." maxlength="300"></textarea>
+    <input type="text" id="g-name" class="form-input" placeholder="Nama kamu *" maxlength="60"/>
+    <textarea id="g-msg" class="form-textarea" placeholder="Tulis ucapan atau doa untuk pasangan..." maxlength="300"></textarea>
     <button class="btn-greet" onclick="submitGreeting()">💌 Kirim Ucapan</button>
   </div>
 
   <div class="greetings-wall" id="greetings-wall">
     <div class="no-greetings" id="no-greet-msg">Belum ada ucapan. Jadilah yang pertama! 🌸</div>
-  </div>
-</section>
-
-<!-- QR GENERATOR -->
-<section id="qr-gen" class="sec">
-  <div class="sec-head">
-    <div class="sec-eyebrow">🎫</div>
-    <h2 class="sec-title">QR Tiket Tamu</h2>
-    <p class="sec-sub">Generate QR unik untuk setiap tamu undangan</p>
-  </div>
-
-  <div class="qr-box">
-    <div class="qr-input-row">
-      <input type="text" id="qr-name-input" placeholder="Masukkan nama tamu..." maxlength="80"
-        onkeydown="if(event.key==='Enter') generateQR()"/>
-      <button class="btn-qr" onclick="generateQR()">🎯 Generate QR</button>
-    </div>
-
-    <div class="qr-result" id="qr-result">
-      <div id="qr-canvas"></div>
-      <div class="qr-guest-name" id="qr-display-name"></div>
-      <div class="qr-sub">Nathan &amp; Ana Wedding · 26 December 2026<br>GSJS Pakuwon Mall Surabaya</div>
-      <button class="btn-dl" onclick="downloadQR()">⬇️ Download QR</button>
-    </div>
-
-    <div class="qr-list" id="qr-list" style="display:none;">
-      <div class="qr-list-title">📋 Daftar Tamu</div>
-      <div class="qr-list-grid" id="qr-list-grid"></div>
-    </div>
   </div>
 </section>
 
@@ -422,309 +421,41 @@ footer span{color:var(--rose);}
 <div class="toast" id="toast"></div>
 
 <script>
-// ── API BASE URL ─────────────────────────────────────────────────
-// Change this to your deployed server URL in production
+// ── CONFIG ──
 const API_BASE = window.location.origin;
 
-// ── RSVP + AUTO QR GENERATOR ──
-let currentTicketName = '';
-let currentTicketId = '';
+// ── HELPERS ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
 
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Generate deterministic ticket ID from guest name
 function generateTicketId(name) {
-  const ts = Date.now().toString(36).toUpperCase();
-  const slug = name.replace(/\s+/g,'').substring(0,4).toUpperCase();
-  return 'NA-' + slug + '-' + ts;
+  const slug = name.trim().replace(/\s+/g,'').substring(0,5).toUpperCase();
+  const hash = Math.abs(name.trim().split('').reduce((a,c) => (a<<5)-a+c.charCodeAt(0), 0))
+    .toString(36).toUpperCase().substring(0,6);
+  return 'NA-' + slug + '-' + hash;
 }
-
-async function submitRSVP() {
-  const nama  = document.getElementById('f-nama').value.trim();
-  const email = document.getElementById('f-email').value.trim();
-  const hadir = document.getElementById('f-hadir').value;
-
-  if (!nama || !email || !hadir) {
-    showToast('⚠️ Isi nama, email, dan kehadiran dulu ya!');
-    return;
-  }
-
-  const ticketId = generateTicketId(nama);
-  document.getElementById('hidden-ticket-id').value = ticketId;
-
-  // Save to MongoDB
-  try {
-    await fetch(API_BASE + '/api/rsvp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ticketId, nama, email, hadir })
-    });
-  } catch(e) {
-    console.warn('API unavailable, continuing offline:', e);
-  }
-
-  currentTicketName = nama;
-  currentTicketId = ticketId;
-  showQRStep(nama, ticketId, hadir);
-}
-
-function showQRStep(nama, ticketId, hadir) {
-  // Hide form, show QR
-  document.getElementById('rsvp-step-form').style.display = 'none';
-  document.getElementById('rsvp-step-qr').style.display = 'block';
-
-  document.getElementById('qr-ticket-name').textContent = nama;
-  document.getElementById('qr-ticket-id').textContent = 'ID: ' + ticketId;
-
-  // QR content
-  const qrData = JSON.stringify({
-    id: ticketId,
-    nama: nama,
-    hadir: hadir,
-    event: 'Nathan & Ana Wedding',
-    date: '26 December 2026',
-    venue: 'GSJS Pakuwon Mall Surabaya'
-  });
-
-  // Generate QR
-  const canvas = document.getElementById('rsvp-qr-canvas');
-  canvas.innerHTML = '';
-  new QRCode(canvas, {
-    text: qrData,
-    width: 180,
-    height: 180,
-    colorDark: '#1a1010',
-    colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
-  });
-
-  // Save to local storage for check-in reference
-  saveGuestForCheckin(ticketId, nama, hadir);
-  showToast('🎉 RSVP berhasil! QR tiket kamu sudah siap!');
-}
-
-function saveGuestForCheckin(ticketId, nama, hadir) {
-  // Already saved via /api/rsvp in submitRSVP — no localStorage needed
-}
-
-function downloadTicketQR() {
-  const qrEl = document.getElementById('rsvp-qr-canvas');
-  const canvas = qrEl.querySelector('canvas');
-  if (!canvas) { showToast('⚠️ QR belum siap!'); return; }
-
-  const off = document.createElement('canvas');
-  off.width = 380; off.height = 500;
-  const ctx = off.getContext('2d');
-
-  // BG
-  ctx.fillStyle = '#fdf8f5';
-  ctx.fillRect(0,0,380,500);
-
-  // Border
-  ctx.strokeStyle = '#e8294a';
-  ctx.lineWidth = 3;
-  roundRectStroke(ctx, 8, 8, 364, 484, 16);
-
-  // Top rose band
-  ctx.fillStyle = '#e8294a';
-  roundRectFill(ctx, 8, 8, 364, 80, 16, true, false);
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 20px serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('Nathan & Ana', 190, 42);
-  ctx.font = '12px sans-serif';
-  ctx.fillText('26 December 2026 · GSJS Pakuwon Mall, Surabaya', 190, 62);
-
-  // QR
-  ctx.drawImage(canvas, 100, 100, 180, 180);
-
-  // Guest info
-  ctx.fillStyle = '#1a1010';
-  ctx.font = 'bold 22px serif';
-  ctx.fillText(currentTicketName, 190, 320);
-  ctx.fillStyle = '#7a6a6a';
-  ctx.font = '13px sans-serif';
-  ctx.fillText('Tamu Undangan', 190, 342);
-
-  // Dashed separator
-  ctx.setLineDash([6,4]);
-  ctx.strokeStyle = '#e8ddd8';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(30, 365); ctx.lineTo(350, 365); ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Ticket ID
-  ctx.fillStyle = '#bbb';
-  ctx.font = '11px monospace';
-  ctx.fillText('TICKET ID: ' + currentTicketId, 190, 390);
-
-  // Bottom heart
-  ctx.fillStyle = '#e8294a';
-  ctx.font = '22px serif';
-  ctx.fillText('♥', 190, 455);
-  ctx.fillStyle = '#bbb';
-  ctx.font = '10px sans-serif';
-  ctx.fillText('Tunjukkan QR ini kepada panitia saat tiba di venue', 190, 475);
-
-  const link = document.createElement('a');
-  link.download = 'Tiket-' + currentTicketName.replace(/\s+/g,'-') + '.png';
-  link.href = off.toDataURL('image/png');
-  link.click();
-  showToast('⬇️ Tiket berhasil didownload!');
-}
-
-function roundRectStroke(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
-  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
-  ctx.closePath(); ctx.stroke();
-}
-
-function roundRectFill(ctx, x, y, w, h, r, tl, bl) {
-  ctx.beginPath();
-  ctx.moveTo(x+r, y);
-  ctx.lineTo(x+w-r, y);
-  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-  ctx.lineTo(x+w, y+h);
-  ctx.lineTo(x, y+h);
-  ctx.lineTo(x, y+r);
-  ctx.quadraticCurveTo(x, y, x+r, y);
-  ctx.closePath(); ctx.fill();
-}
-
-// ── COUNTDOWN ──
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.getElementById('rsvp-form');
-  if (!form) return;
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const data = new FormData(form);
-    fetch('/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(data).toString()
-    })
-    .then(() => {
-      document.getElementById('rsvp-success').style.display = 'block';
-      form.reset();
-      showToast('🎉 RSVP berhasil dikirim!');
-      form.querySelector('button[type=submit]').style.display = 'none';
-    })
-    .catch(() => {
-      showToast('⚠️ Gagal kirim, coba lagi ya!');
-    });
-  });
-});
-
-// ── GUEST PERSONALIZATION + QR TICKET ──
-(function() {
-  const params = new URLSearchParams(window.location.search);
-  const tamu = params.get('tamu');
-  if (!tamu) return;
-
-  document.addEventListener('DOMContentLoaded', function() {
-    // 1. Show welcome banner
-    const banner = document.getElementById('guest-banner');
-    const nameEl = document.getElementById('guest-banner-name');
-    if (banner && nameEl) {
-      nameEl.textContent = tamu;
-      banner.style.display = 'block';
-    }
-
-    // 2. Pre-fill RSVP name
-    const nameInput = document.querySelector('input[name="nama"]');
-    if (nameInput) nameInput.value = tamu;
-
-    // 3. Show personal QR ticket section
-    const qrSection = document.getElementById('personal-qr-section');
-    if (qrSection) {
-      qrSection.style.display = 'block';
-
-      // Generate unique ticket ID deterministically from name
-      const ticketId = 'NA-' + tamu.replace(/\s+/g,'').substring(0,5).toUpperCase() + '-' + 
-        Math.abs(tamu.split('').reduce((a,c) => (a<<5)-a+c.charCodeAt(0),0)).toString(36).toUpperCase().substring(0,6);
-
-      document.getElementById('personal-qr-name').textContent = tamu;
-      document.getElementById('personal-qr-id').textContent = 'ID: ' + ticketId;
-
-      // QR data
-      const qrData = JSON.stringify({
-        id: ticketId,
-        nama: tamu,
-        event: 'Nathan & Ana Wedding',
-        date: '26 December 2026',
-        venue: 'GSJS Pakuwon Mall Surabaya'
-      });
-
-      const qrCanvas = document.getElementById('personal-qr-canvas');
-      if (qrCanvas && typeof QRCode !== 'undefined') {
-        new QRCode(qrCanvas, {
-          text: qrData,
-          width: 180,
-          height: 180,
-          colorDark: '#1a1010',
-          colorLight: '#ffffff',
-          correctLevel: QRCode.CorrectLevel.H
-        });
-      }
-
-      // Store for check-in via API
-      try {
-        fetch(API_BASE + '/api/rsvp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ticketId, nama: tamu, hadir: 'Hadir' })
-        }).catch(() => {});
-      } catch(e) {}
-
-      // Download QR button
-      document.getElementById('btn-download-personal-qr').onclick = function() {
-        const c = qrCanvas.querySelector('canvas');
-        if (!c) return;
-        const off = document.createElement('canvas');
-        off.width = 380; off.height = 500;
-        const ctx = off.getContext('2d');
-        ctx.fillStyle = '#fdf8f5'; ctx.fillRect(0,0,380,500);
-        ctx.strokeStyle = '#e8294a'; ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.roundRect(8,8,364,484,16); ctx.stroke();
-        ctx.fillStyle = '#e8294a';
-        ctx.beginPath(); ctx.roundRect(8,8,364,80,16); ctx.fill();
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 20px serif'; ctx.textAlign = 'center';
-        ctx.fillText('Nathan & Ana', 190, 42);
-        ctx.font = '12px sans-serif';
-        ctx.fillText('26 December 2026 · GSJS Pakuwon Mall', 190, 62);
-        ctx.drawImage(c, 100, 100, 180, 180);
-        ctx.fillStyle = '#1a1010'; ctx.font = 'bold 22px serif';
-        ctx.fillText(tamu, 190, 322);
-        ctx.fillStyle = '#7a6a6a'; ctx.font = '13px sans-serif';
-        ctx.fillText('Tamu Undangan', 190, 344);
-        ctx.setLineDash([6,4]); ctx.strokeStyle = '#e8ddd8'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(30,368); ctx.lineTo(350,368); ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.fillStyle = '#bbb'; ctx.font = '11px monospace';
-        ctx.fillText('TICKET: ' + ticketId, 190, 392);
-        ctx.fillStyle = '#e8294a'; ctx.font = '22px serif';
-        ctx.fillText('♥', 190, 450);
-        ctx.fillStyle = '#bbb'; ctx.font = '10px sans-serif';
-        ctx.fillText('Tunjukkan QR ini kepada panitia saat tiba di venue', 190, 472);
-        const link = document.createElement('a');
-        link.download = 'Tiket-' + tamu.replace(/\s+/g,'-') + '.png';
-        link.href = off.toDataURL('image/png');
-        link.click();
-        showToast('⬇️ Tiket berhasil didownload!');
-      };
-    }
-  });
-})();
 
 // ── COUNTDOWN ──
 function tick() {
   const target = new Date('2026-12-26T09:00:00');
   const now = new Date();
   const diff = target - now;
-  if (diff <= 0) return;
+  if (diff <= 0) {
+    document.getElementById('cd-d').textContent = '00';
+    document.getElementById('cd-h').textContent = '00';
+    document.getElementById('cd-m').textContent = '00';
+    document.getElementById('cd-s').textContent = '00';
+    return;
+  }
   const d = Math.floor(diff/86400000);
   const h = Math.floor((diff%86400000)/3600000);
   const m = Math.floor((diff%3600000)/60000);
@@ -734,41 +465,200 @@ function tick() {
   document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
   document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
 }
-tick(); setInterval(tick, 1000);
+tick();
+setInterval(tick, 1000);
 
-// ── TOAST ──
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 4000);
+// ── RSVP LOGIC ──
+let rsvpGuestName = '';
+let rsvpTicketId = '';
+
+function onHadirChange() {
+  const val = document.getElementById('f-hadir').value;
+  const isHadir = val === 'Hadir';
+  document.getElementById('jumlah-section').style.display = isHadir ? 'block' : 'none';
+  document.getElementById('alergi-section').style.display = isHadir ? 'block' : 'none';
 }
 
-// ── GREETING WALL (MongoDB-backed) ──
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+async function submitRSVP() {
+  const params = new URLSearchParams(window.location.search);
+  const nama = params.get('tamu');
+  if (!nama) { showToast('⚠️ Link undangan tidak valid!'); return; }
+
+  const hadir = document.getElementById('f-hadir').value;
+  if (!hadir) { showToast('⚠️ Pilih kehadiran dulu ya!'); return; }
+
+  const jumlah = hadir === 'Hadir' ? parseInt(document.getElementById('f-jumlah').value) : 0;
+  const alergi = hadir === 'Hadir' ? (document.getElementById('f-alergi').value.trim() || '') : '';
+
+  const ticketId = generateTicketId(nama);
+  rsvpGuestName = nama;
+  rsvpTicketId = ticketId;
+
+  // Save to server
+  try {
+    await fetch(API_BASE + '/api/rsvp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticketId, nama, hadir, jumlah, alergi, email: '' })
+    });
+  } catch(e) {
+    console.warn('Server unavailable, proceeding offline');
+  }
+
+  // Show appropriate state
+  document.getElementById('rsvp-form').style.display = 'none';
+
+  if (hadir === 'Tidak Hadir') {
+    document.getElementById('rsvp-tidak-hadir').style.display = 'block';
+    showToast('💌 Terima kasih atas responnya!');
+  } else {
+    // Generate QR and show ticket
+    document.getElementById('rsvp-qr').style.display = 'block';
+    document.getElementById('qr-ticket-name').textContent = nama;
+    document.getElementById('qr-ticket-id').textContent = 'TICKET: ' + ticketId;
+
+    // QR data — format yang bisa dibaca checkin.html
+    const qrData = JSON.stringify({
+      id: ticketId,
+      nama: nama,
+      hadir: hadir,
+      jumlah: jumlah,
+      alergi: alergi,
+      event: 'Nathan & Ana Wedding',
+      date: '26 December 2026',
+      venue: 'GSJS Pakuwon Mall Surabaya'
+    });
+
+    const canvas = document.getElementById('rsvp-qr-canvas');
+    canvas.innerHTML = '';
+    if (typeof QRCode !== 'undefined') {
+      new QRCode(canvas, {
+        text: qrData,
+        width: 180,
+        height: 180,
+        colorDark: '#1a1010',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
+    showToast('🎉 RSVP berhasil! QR tiket kamu sudah siap!');
+  }
 }
 
+function downloadRSVPQR() {
+  const qrEl = document.getElementById('rsvp-qr-canvas');
+  const canvas = qrEl ? qrEl.querySelector('canvas') : null;
+  if (!canvas) { showToast('⚠️ QR belum siap!'); return; }
+
+  const off = document.createElement('canvas');
+  off.width = 380; off.height = 520;
+  const ctx = off.getContext('2d');
+
+  // BG
+  ctx.fillStyle = '#fdf8f5';
+  ctx.fillRect(0,0,380,520);
+
+  // Border
+  ctx.strokeStyle = '#e8294a';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(8,8,364,504,16);
+  ctx.stroke();
+
+  // Header band
+  ctx.fillStyle = '#e8294a';
+  ctx.beginPath();
+  ctx.roundRect(8,8,364,80,16);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 20px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Nathan & Ana', 190, 42);
+  ctx.font = '12px sans-serif';
+  ctx.fillText('26 December 2026 · GSJS Pakuwon Mall, Surabaya', 190, 62);
+
+  // QR
+  ctx.drawImage(canvas, 100, 105, 180, 180);
+
+  // Guest info
+  ctx.fillStyle = '#1a1010';
+  ctx.font = 'bold 22px serif';
+  ctx.fillText(rsvpGuestName, 190, 330);
+  ctx.fillStyle = '#7a6a6a';
+  ctx.font = '13px sans-serif';
+  ctx.fillText('Tamu Undangan', 190, 352);
+
+  // Dashed divider
+  ctx.setLineDash([6,4]);
+  ctx.strokeStyle = '#e8ddd8';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(30,375); ctx.lineTo(350,375); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Ticket ID
+  ctx.fillStyle = '#bbb';
+  ctx.font = '11px monospace';
+  ctx.fillText('TICKET: ' + rsvpTicketId, 190, 400);
+
+  // Heart
+  ctx.fillStyle = '#e8294a';
+  ctx.font = '24px serif';
+  ctx.fillText('♥', 190, 460);
+  ctx.fillStyle = '#bbb';
+  ctx.font = '10px sans-serif';
+  ctx.fillText('Tunjukkan QR ini kepada panitia saat tiba di venue', 190, 485);
+
+  const link = document.createElement('a');
+  link.download = 'Tiket-' + rsvpGuestName.replace(/\s+/g,'-') + '.png';
+  link.href = off.toDataURL('image/png');
+  link.click();
+  showToast('⬇️ Tiket berhasil didownload!');
+}
+
+// ── INIT RSVP on page load ──
+(function initRSVP() {
+  const params = new URLSearchParams(window.location.search);
+  const tamu = params.get('tamu');
+
+  if (!tamu) {
+    document.getElementById('rsvp-locked').style.display = 'block';
+    return;
+  }
+
+  // Show personalized form
+  document.getElementById('rsvp-form').style.display = 'block';
+  document.getElementById('rsvp-guest-name').textContent = tamu;
+  document.getElementById('rsvp-name-display').textContent = tamu;
+
+  // Show welcome banner
+  const banner = document.getElementById('guest-banner');
+  const nameEl = document.getElementById('guest-banner-name');
+  if (banner && nameEl) {
+    nameEl.textContent = tamu;
+    banner.style.display = 'block';
+  }
+})();
+
+// ── GREETING WALL ──
 async function renderGreetings() {
   const wall = document.getElementById('greetings-wall');
   try {
     const res = await fetch(API_BASE + '/api/greetings');
+    if (!res.ok) throw new Error('Server error');
     const greetings = await res.json();
     if (!greetings.length) {
-      wall.innerHTML = '<div class="no-greetings" id="no-greet-msg">Belum ada ucapan. Jadilah yang pertama! 🌸</div>';
+      wall.innerHTML = '<div class="no-greetings">Belum ada ucapan. Jadilah yang pertama! 🌸</div>';
       return;
     }
-    wall.innerHTML = '';
-    greetings.forEach(g => {
-      const card = document.createElement('div');
-      card.className = 'greet-card';
-      card.innerHTML = `
+    // Duplicate for seamless marquee
+    const cards = [...greetings, ...greetings].map(g => `
+      <div class="greet-card">
         <div class="greet-name">✨ ${escHtml(g.name)}</div>
         <div class="greet-msg">"${escHtml(g.msg)}"</div>
-        <div class="greet-time">${g.time}</div>
-      `;
-      wall.appendChild(card);
-    });
+        <div class="greet-time">${g.time || ''}</div>
+      </div>
+    `).join('');
+    wall.innerHTML = `<div class="greetings-track">${cards}</div>`;
   } catch(e) {
     wall.innerHTML = '<div class="no-greetings">Belum ada ucapan. Jadilah yang pertama! 🌸</div>';
   }
@@ -790,119 +680,89 @@ async function submitGreeting() {
       document.getElementById('g-msg').value = '';
       showToast('💌 Ucapan kamu sudah terkirim!');
       renderGreetings();
-    } else { showToast('⚠️ Gagal kirim, coba lagi ya!'); }
-  } catch(e) { showToast('⚠️ Tidak dapat terhubung ke server.'); }
-}
-
-renderGreetings();
-
-// ── QR GENERATOR ──
-let guestList = [];
-let currentQRName = '';
-
-function generateQR() {
-  const name = document.getElementById('qr-name-input').value.trim();
-  if (!name) { showToast('⚠️ Masukkan nama tamu dulu!'); return; }
-
-  currentQRName = name;
-  const result = document.getElementById('qr-result');
-  const canvas = document.getElementById('qr-canvas');
-  canvas.innerHTML = '';
-
-  // QR content: unique per guest
-  const qrContent = `WEDDING INVITATION\nNathan & Ana\n26 December 2026\nGSJS Pakuwon Mall Surabaya\nGuest: ${name}\nID: ${btoa(name + '-2026-nathan-ana').replace(/=/g,'')}`;
-
-  new QRCode(canvas, {
-    text: qrContent,
-    width: 200,
-    height: 200,
-    colorDark: '#1a1010',
-    colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
-  });
-
-  document.getElementById('qr-display-name').textContent = name;
-  result.classList.add('show');
-
-  // Add to list if not already there
-  if (!guestList.includes(name)) {
-    guestList.push(name);
-    renderGuestList();
+    } else {
+      showToast('⚠️ Gagal kirim, coba lagi ya!');
+    }
+  } catch(e) {
+    showToast('⚠️ Tidak dapat terhubung ke server.');
   }
-
-  document.getElementById('qr-name-input').value = '';
-  showToast(`🎫 QR untuk ${name} berhasil dibuat!`);
 }
 
-function renderGuestList() {
-  const listEl = document.getElementById('qr-list');
-  const grid = document.getElementById('qr-list-grid');
-  if (guestList.length === 0) { listEl.style.display='none'; return; }
-  listEl.style.display = 'block';
-  grid.innerHTML = '';
-  guestList.forEach(name => {
-    const item = document.createElement('div');
-    item.className = 'qr-list-item';
-    item.innerHTML = `<span>👤 ${escHtml(name)}</span><button class="btn-qr-view" onclick="regenQR('${escHtml(name)}')">Lihat QR</button>`;
-    grid.appendChild(item);
+// Auto-refresh greetings every 30s
+renderGreetings();
+setInterval(renderGreetings, 30000);
+
+// ── ENVELOPE OPENING ──
+(function initEnvelope() {
+  const params = new URLSearchParams(window.location.search);
+  const tamu = params.get('tamu');
+  const nameEl = document.getElementById('env-guest-name');
+  if (nameEl && tamu) nameEl.textContent = tamu;
+})();
+
+function openEnvelope() {
+  const screen = document.getElementById('envelope-screen');
+  screen.classList.add('hide');
+  setTimeout(() => screen.style.display = 'none', 900);
+  // Trigger music on button click
+  if (!musicStarted) {
+    music.play().then(() => {
+      musicStarted = true;
+      disc.classList.add('playing');
+      icon.textContent = '⏸️';
+      window.removeEventListener('scroll', startMusic);
+      window.removeEventListener('mousemove', startMusic);
+      window.removeEventListener('touchstart', startMusic);
+    }).catch(() => {});
+  }
+}
+
+// ── SCROLL REVEAL ──
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      revealObserver.unobserve(e.target);
+    }
   });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => {
+  revealObserver.observe(el);
+});
+
+// ── MUSIC ──
+const music = document.getElementById('bg-music');
+const disc = document.getElementById('vinyl-disc');
+const icon = document.getElementById('vinyl-icon');
+let musicStarted = false;
+
+function startMusic() {
+  if (musicStarted) return;
+  music.play().then(() => {
+    musicStarted = true;
+    disc.classList.add('playing');
+    icon.textContent = '⏸️';
+    window.removeEventListener('scroll', startMusic);
+    window.removeEventListener('mousemove', startMusic);
+    window.removeEventListener('touchstart', startMusic);
+  }).catch(() => {});
 }
 
-function regenQR(name) {
-  document.getElementById('qr-name-input').value = name;
-  generateQR();
-  document.getElementById('qr-gen').scrollIntoView({behavior:'smooth'});
-}
+window.addEventListener('scroll', startMusic);
+window.addEventListener('mousemove', startMusic);
+window.addEventListener('touchstart', startMusic);
 
-function downloadQR() {
-  const canvas = document.querySelector('#qr-canvas canvas');
-  if (!canvas) return;
-
-  // Create a larger canvas with text
-  const offscreen = document.createElement('canvas');
-  offscreen.width = 320; offscreen.height = 400;
-  const ctx = offscreen.getContext('2d');
-
-  // Background
-  ctx.fillStyle = '#fdf8f5';
-  ctx.fillRect(0,0,320,400);
-
-  // Border
-  ctx.strokeStyle = '#e8294a';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(8,8,304,384);
-
-  // Header text
-  ctx.fillStyle = '#e8294a';
-  ctx.font = 'bold 14px serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('Nathan & Ana', 160, 38);
-  ctx.fillStyle = '#7a6a6a';
-  ctx.font = '11px sans-serif';
-  ctx.fillText('26 December 2026 · Surabaya', 160, 56);
-
-  // QR image
-  ctx.drawImage(canvas, 60, 70, 200, 200);
-
-  // Guest name
-  ctx.fillStyle = '#1a1010';
-  ctx.font = 'bold 16px serif';
-  ctx.fillText(currentQRName, 160, 298);
-  ctx.fillStyle = '#7a6a6a';
-  ctx.font = '11px sans-serif';
-  ctx.fillText('Tamu Undangan', 160, 316);
-  ctx.fillText('GSJS Pakuwon Mall Surabaya', 160, 334);
-
-  // Heart
-  ctx.fillStyle = '#e8294a';
-  ctx.font = '18px serif';
-  ctx.fillText('♥', 160, 370);
-
-  const link = document.createElement('a');
-  link.download = `QR-Tamu-${currentQRName.replace(/\s+/g,'-')}.png`;
-  link.href = offscreen.toDataURL('image/png');
-  link.click();
-  showToast('⬇️ QR berhasil didownload!');
+function toggleMusic() {
+  if (music.paused) {
+    music.play();
+    disc.classList.add('playing');
+    icon.textContent = '⏸️';
+  } else {
+    music.pause();
+    disc.classList.remove('playing');
+    icon.textContent = '▶️';
+  }
 }
 </script>
 </body>

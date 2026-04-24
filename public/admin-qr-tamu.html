@@ -7,6 +7,60 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
+#login-screen {
+  position:fixed;inset:0;background:#fdf8f5;
+  display:flex;align-items:center;justify-content:center;
+  z-index:9999;font-family:'Jost',sans-serif;
+}
+.login-box {
+  background:#fff;border-radius:20px;padding:2.5rem 2rem;
+  box-shadow:0 8px 40px rgba(232,41,74,0.12);
+  text-align:center;width:100%;max-width:360px;margin:1rem;
+}
+.login-box .lock { font-size:3rem; margin-bottom:0.5rem; }
+.login-box h2 { font-family:'Playfair Display',serif; color:#e8294a; margin-bottom:0.3rem; font-size:1.5rem; }
+.login-box p { color:#7a6a6a; font-size:0.88rem; margin-bottom:1.5rem; }
+.login-box input {
+  width:100%;padding:0.85rem 1rem;border:1.5px solid #e8ddd8;
+  border-radius:10px;font-family:'Jost',sans-serif;font-size:1.2rem;
+  text-align:center;letter-spacing:0.3em;outline:none;margin-bottom:1rem;
+}
+.login-box input:focus { border-color:#e8294a; }
+.login-box button {
+  width:100%;padding:0.9rem;background:#e8294a;color:#fff;
+  border:none;border-radius:10px;font-family:'Jost',sans-serif;
+  font-size:1rem;font-weight:600;cursor:pointer;
+}
+.login-box button:hover { background:#cc1e3a; }
+.login-error { color:#e8294a;font-size:0.85rem;margin-top:0.8rem;display:none; }
+</style>
+<script>
+(function(){
+  const PASS = '082001', KEY = 'admin_auth_na';
+  function init() {
+    if (sessionStorage.getItem(KEY) === '1') return;
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('main-content').style.display = 'none';
+    });
+  }
+  window.doLogin = function() {
+    const val = document.getElementById('login-pass').value;
+    if (val === PASS) {
+      sessionStorage.setItem(KEY, '1');
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('main-content').style.display = 'block';
+      loadData();
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+      document.getElementById('login-pass').value = '';
+    }
+  };
+  window.loginKeydown = function(e) { if(e.key==='Enter') window.doLogin(); };
+  init();
+})();
+</script>
+<style>
 :root {
   --rose: #e8294a;
   --rose-light: #fce8ec;
@@ -219,7 +273,16 @@ header p { opacity:0.85; font-size:0.95rem; }
 .url-box input:focus { border-color:var(--rose); }
 .url-tip { font-size:0.78rem; color:var(--muted); width:100%; }
 
-/* TOAST */
+/* RSVP BADGE */
+.badge-rsvp{display:inline-block;padding:0.15rem 0.5rem;border-radius:20px;font-size:0.68rem;font-weight:600;margin-top:0.3rem;}
+.badge-rsvp.hadir{background:#e8f8ef;color:#27ae60;}
+.badge-rsvp.tidak{background:#fff0f0;color:#e74c3c;}
+.badge-rsvp.pending{background:#fff8e1;color:#f39c12;}
+.badge-source{display:inline-block;padding:0.15rem 0.5rem;border-radius:20px;font-size:0.65rem;font-weight:600;margin-left:0.3rem;background:#f0f0f0;color:#888;}
+
+/* STATS extra */
+.stat-card.rsvp .stat-num{color:#27ae60;}
+
 .toast {
   position:fixed; bottom:1.5rem; right:1.5rem;
   background:var(--dark); color:#fff;
@@ -240,6 +303,21 @@ header p { opacity:0.85; font-size:0.95rem; }
 </style>
 </head>
 <body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" style="display:none;">
+  <div class="login-box">
+    <div class="lock">👑</div>
+    <h2>Admin Area</h2>
+    <p>Nathan &amp; Ana Wedding · 26 December 2026</p>
+    <input type="password" id="login-pass" placeholder="Masukkan password" onkeydown="loginKeydown(event)" autofocus/>
+    <button onclick="doLogin()">🔓 Masuk</button>
+    <div class="login-error" id="login-error">❌ Password salah, coba lagi!</div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main-content">
 
 <header>
   <h1>💍 Admin QR Tamu</h1>
@@ -262,6 +340,7 @@ header p { opacity:0.85; font-size:0.95rem; }
     <div class="input-row">
       <input type="text" id="guest-input" placeholder="Nama tamu (contoh: Budi Santoso)"
         onkeydown="if(event.key==='Enter') addGuest()"/>
+      <input type="text" id="phone-input" placeholder="No. HP (contoh: 08123456789)" style="min-width:170px;"/>
       <button class="btn" onclick="addGuest()">+ Tambah Tamu</button>
     </div>
   </div>
@@ -287,8 +366,16 @@ Rina Wati
       <div class="stat-num" id="stat-total">0</div>
       <div class="stat-label">Total Tamu</div>
     </div>
+    <div class="stat-card rsvp">
+      <div class="stat-num" id="stat-rsvp">0</div>
+      <div class="stat-label">Sudah RSVP</div>
+    </div>
     <div class="stat-card">
-      <div class="stat-num" style="color:#27ae60" id="stat-qr">0</div>
+      <div class="stat-num" id="stat-hadir">0</div>
+      <div class="stat-label">Konfirm Hadir</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-qr">0</div>
       <div class="stat-label">QR Dibuat</div>
     </div>
   </div>
@@ -315,16 +402,68 @@ Rina Wati
 
 <script>
 const API_BASE = window.location.origin;
-let guests = [];
+
+// Same deterministic ticketId as index.html — same name = same QR always
+function generateTicketId(name) {
+  const slug = name.trim().replace(/\s+/g,'').substring(0,5).toUpperCase();
+  const hash = Math.abs(name.trim().split('').reduce((a,c) => (a<<5)-a+c.charCodeAt(0), 0))
+    .toString(36).toUpperCase().substring(0,6);
+  return 'NA-' + slug + '-' + hash;
+}
+let allGuests = []; // merged: admin guests + rsvp guests
 let qrInstances = {};
 
-// Load saved data from MongoDB
+// Load both guests and rsvp collections, merge them
 async function loadData() {
   try {
-    const res = await fetch(API_BASE + '/api/guests');
-    guests = await res.json();
+    const [gRes, rRes] = await Promise.all([
+      fetch(API_BASE + '/api/guests'),
+      fetch(API_BASE + '/api/rsvp')
+    ]);
+    const adminGuests = await gRes.json(); // { _id, name }
+    const rsvpGuests  = await rRes.json(); // { _id, ticketId, nama, hadir, checkedIn }
+
+    // Build unified list
+    // Start with admin guests
+    const merged = adminGuests.map(g => ({
+      _id: g._id,
+      name: g.name,
+      phone: g.phone || '',
+      source: 'admin',
+      rsvp: null
+    }));
+
+    // Add/merge RSVP guests
+    rsvpGuests.forEach(r => {
+      const existing = merged.find(g => g.name.toLowerCase() === r.nama.toLowerCase());
+      if (existing) {
+        // Merge RSVP data into admin guest
+        existing.rsvp = r;
+      } else {
+        // RSVP guest not in admin list — add them
+        merged.push({
+          _id: r._id,
+          name: r.nama,
+          phone: '',
+          source: 'rsvp',
+          rsvp: r
+        });
+      }
+    });
+
+    allGuests = merged;
+
     const savedUrl = localStorage.getItem('nathan_ana_base_url') || '';
     document.getElementById('base-url').value = savedUrl;
+
+    // Update stats
+    const rsvpCount = allGuests.filter(g => g.rsvp).length;
+    const hadirCount = allGuests.filter(g => g.rsvp && g.rsvp.hadir === 'Hadir').length;
+    document.getElementById('stat-total').textContent = allGuests.length;
+    document.getElementById('stat-rsvp').textContent = rsvpCount;
+    document.getElementById('stat-hadir').textContent = hadirCount;
+    document.getElementById('stat-qr').textContent = allGuests.length;
+
     renderGuests();
   } catch(e) {
     showToast('⚠️ Tidak dapat terhubung ke server MongoDB.');
@@ -337,12 +476,16 @@ function saveBaseUrl() {
 }
 
 function getBaseUrl() {
-  const url = document.getElementById('base-url').value.trim();
-  return url || 'https://nathan-ana-wedding.com';
-}
-
-function slugify(name) {
-  return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '').replace(/--+/g, '-');
+  let url = document.getElementById('base-url').value.trim();
+  if (!url) url = 'https://nathan-ana-wedding.com';
+  // Strip trailing slashes and any accidental sub-paths
+  url = url.replace(/\/+$/, '');
+  // If someone typed https://domain.com/something, strip the /something
+  try {
+    const u = new URL(url);
+    url = u.origin; // just protocol + hostname + port
+  } catch(e) {}
+  return url;
 }
 
 function getGuestUrl(name) {
@@ -351,22 +494,24 @@ function getGuestUrl(name) {
 
 async function addGuest() {
   const input = document.getElementById('guest-input');
+  const phoneInput = document.getElementById('phone-input');
   const name = input.value.trim();
+  const phone = phoneInput ? phoneInput.value.trim() : '';
   if (!name) { showToast('⚠️ Masukkan nama tamu dulu!'); return; }
 
   try {
     const res = await fetch(API_BASE + '/api/guests', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name })
+      body: JSON.stringify({ name, phone })
     });
     const json = await res.json();
     if (res.status === 409) { showToast('⚠️ Nama ini sudah ada!'); return; }
     if (!res.ok) { showToast('⚠️ Gagal tambah tamu.'); return; }
-    guests.push(json);
-    renderGuests();
     input.value = '';
+    if (phoneInput) phoneInput.value = '';
     showToast('✅ ' + name + ' berhasil ditambahkan!');
+    loadData();
   } catch(e) { showToast('⚠️ Tidak dapat terhubung ke server.'); }
 }
 
@@ -382,19 +527,22 @@ async function addBulk() {
       body: JSON.stringify({ names: lines })
     });
     const json = await res.json();
-    guests.push(...json.guests);
-    renderGuests();
     textarea.value = '';
     showToast('✅ ' + json.added + ' tamu berhasil ditambahkan!');
+    loadData();
   } catch(e) { showToast('⚠️ Tidak dapat terhubung ke server.'); }
 }
 
-async function removeGuest(id) {
+async function removeGuest(id, source) {
   try {
-    await fetch(API_BASE + '/api/guests/' + id, { method: 'DELETE' });
-    guests = guests.filter(g => String(g._id) !== String(id));
-    renderGuests();
+    if (source === 'admin') {
+      await fetch(API_BASE + '/api/guests/' + id, { method: 'DELETE' });
+    } else {
+      // RSVP-only guest — just note, or delete from rsvp
+      await fetch(API_BASE + '/api/guests/' + id, { method: 'DELETE' }).catch(() => {});
+    }
     showToast('🗑️ Tamu dihapus');
+    loadData();
   } catch(e) { showToast('⚠️ Gagal hapus tamu.'); }
 }
 
@@ -402,23 +550,25 @@ async function clearAll() {
   if (!confirm('Hapus semua tamu? Tidak bisa di-undo.')) return;
   try {
     await fetch(API_BASE + '/api/guests', { method: 'DELETE' });
-    guests = []; qrInstances = {};
-    renderGuests();
+    qrInstances = {};
     showToast('🗑️ Semua tamu dihapus');
+    loadData();
   } catch(e) { showToast('⚠️ Gagal hapus semua tamu.'); }
 }
 
 function renderGuests() {
   const grid = document.getElementById('guest-grid');
   const search = document.getElementById('search-input').value.toLowerCase();
-  const filtered = guests.filter(g => g.name.toLowerCase().includes(search));
+  const filtered = allGuests.filter(g => g.name.toLowerCase().includes(search));
 
-  document.getElementById('stat-total').textContent = guests.length;
-  document.getElementById('stat-qr').textContent = guests.length;
+  document.getElementById('stat-total').textContent = allGuests.length;
+  document.getElementById('stat-rsvp').textContent = allGuests.filter(g => g.rsvp).length;
+  document.getElementById('stat-hadir').textContent = allGuests.filter(g => g.rsvp && g.rsvp.hadir === 'Hadir').length;
+  document.getElementById('stat-qr').textContent = allGuests.length;
 
   if (!filtered.length) {
-    grid.innerHTML = '<div class="empty"><div>' + (guests.length ? '🔍' : '👥') + '</div><p>' +
-      (guests.length ? 'Tidak ada hasil pencarian.' : 'Belum ada tamu. Tambahkan nama tamu di atas!') +
+    grid.innerHTML = '<div class="empty"><div>' + (allGuests.length ? '🔍' : '👥') + '</div><p>' +
+      (allGuests.length ? 'Tidak ada hasil pencarian.' : 'Belum ada tamu. Tambahkan nama tamu di atas!') +
       '</p></div>';
     return;
   }
@@ -426,34 +576,83 @@ function renderGuests() {
   grid.innerHTML = '';
   filtered.forEach((guest, idx) => {
     const guestUrl = getGuestUrl(guest.name);
-    const qrId = 'qr-' + guest._id;
+    const qrId = 'qr-' + String(guest._id);
+    const phone = guest.phone || '';
+    const phoneClean = phone.replace(/\D/g,'');
+    const waNum = phoneClean.startsWith('0') ? '62' + phoneClean.slice(1) : phoneClean;
+
+    // RSVP badge
+    let rsvpBadge = '<span class="badge-rsvp pending">⏳ Belum RSVP</span>';
+    if (guest.rsvp) {
+      if (guest.rsvp.hadir === 'Hadir') rsvpBadge = '<span class="badge-rsvp hadir">✅ Hadir' + (guest.rsvp.jumlah ? ' (' + guest.rsvp.jumlah + ' org)' : '') + '</span>';
+      else if (guest.rsvp.hadir === 'Tidak Hadir') rsvpBadge = '<span class="badge-rsvp tidak">❌ Tidak Hadir</span>';
+      else rsvpBadge = '<span class="badge-rsvp hadir">✅ RSVP</span>';
+    }
+
+    const sourceBadge = guest.source === 'rsvp'
+      ? '<span class="badge-source">via RSVP</span>'
+      : '<span class="badge-source">via Admin</span>';
+
+    const ticketInfo = guest.rsvp
+      ? `<div style="font-size:0.68rem;color:#bbb;margin-top:0.2rem;font-family:monospace;">${guest.rsvp.ticketId || ''}</div>`
+      : '';
+
+    // Phone field (inline editable)
+    const phoneHtml = `
+      <div style="display:flex;align-items:center;gap:0.4rem;margin:0.5rem 0 0.3rem;">
+        <span style="font-size:0.75rem;color:var(--muted);">📱</span>
+        <input type="text" id="phone-${String(guest._id)}"
+          value="${escHtml(phone)}"
+          placeholder="No. HP tamu"
+          style="flex:1;padding:0.3rem 0.5rem;border:1px solid #e8ddd8;border-radius:6px;font-family:'Jost',sans-serif;font-size:0.75rem;outline:none;"
+          onfocus="this.style.borderColor='var(--rose)'" onblur="this.style.borderColor='#e8ddd8'"
+          onkeydown="if(event.key==='Enter') savePhone('${String(guest._id)}')"/>
+        <button onclick="savePhone('${String(guest._id)}')" title="Simpan no. HP"
+          style="padding:0.3rem 0.5rem;background:var(--rose-light);color:var(--rose);border:none;border-radius:6px;font-size:0.7rem;cursor:pointer;font-weight:600;">💾</button>
+      </div>`;
 
     const card = document.createElement('div');
     card.className = 'guest-card';
     card.innerHTML = `
-      <div class="guest-num">#${guests.indexOf(guest) + 1}</div>
+      <div class="guest-num">#${idx + 1}</div>
       <div class="guest-name">👤 ${escHtml(guest.name)}</div>
+      <div style="margin:0.3rem 0;">${rsvpBadge}${sourceBadge}</div>
+      ${ticketInfo}
+      ${phoneHtml}
       <div class="guest-link" title="Link undangan unik">🔗 ${escHtml(guestUrl)}</div>
       <div class="guest-qr" id="${qrId}"></div>
       <div class="card-actions">
-        <button class="btn-sm btn-dl" onclick="downloadQR('${guest._id}', '${escHtml(guest.name)}')">⬇️ QR</button>
+        <button class="btn-sm btn-dl" onclick="downloadQR('${String(guest._id)}', '${escHtml(guest.name)}')">⬇️ QR</button>
         <button class="btn-sm btn-copy" onclick="copyLink('${escHtml(guestUrl)}')">📋 Link</button>
-        <button class="btn-sm btn-wa" onclick="shareWA('${escHtml(guest.name)}', '${escHtml(guestUrl)}')">💬 WA</button>
-        <button class="btn-sm btn-del" onclick="removeGuest('${guest._id}')">🗑️</button>
+        <button class="btn-sm btn-wa" onclick="shareWA('${escHtml(guest.name)}', '${escHtml(guestUrl)}', '${waNum}')">💬 WA</button>
+        <button class="btn-sm btn-del" onclick="removeGuest('${String(guest._id)}', '${guest.source}')">🗑️</button>
       </div>
     `;
     grid.appendChild(card);
 
+    // Generate QR
     const qrEl = document.getElementById(qrId);
     if (qrEl) {
       try {
-        const qr = new QRCode(qrEl, {
-          text: guestUrl,
+        const tId = (guest.rsvp && guest.rsvp.ticketId)
+          ? guest.rsvp.ticketId
+          : generateTicketId(guest.name);
+
+        let qrText = JSON.stringify({
+          id: tId,
+          nama: guest.name,
+          hadir: (guest.rsvp && guest.rsvp.hadir) ? guest.rsvp.hadir : 'Hadir',
+          event: 'Nathan & Ana Wedding',
+          date: '26 December 2026',
+          venue: 'GSJS Pakuwon Mall Surabaya'
+        });
+        new QRCode(qrEl, {
+          text: qrText,
           width: 160, height: 160,
           colorDark: '#1a1010', colorLight: '#ffffff',
           correctLevel: QRCode.CorrectLevel.H
         });
-        qrInstances[guest._id] = { qr, name: guest.name, url: guestUrl };
+        qrInstances[String(guest._id)] = { name: guest.name, url: guestUrl };
       } catch(e) {}
     }
   });
@@ -463,9 +662,43 @@ function copyLink(url) {
   navigator.clipboard.writeText(url).then(() => showToast('📋 Link berhasil di-copy!')).catch(() => showToast('⚠️ Gagal copy, coba manual'));
 }
 
-function shareWA(name, url) {
-  const msg = encodeURIComponent(`Halo ${name}! 🎉\n\nKamu diundang ke pernikahan Nathan & Ana\n📅 26 December 2026\n📍 GSJS Pakuwon Mall Surabaya\n\nBuka link undangan personal kamu di sini:\n${url}\n\nSampai jumpa di hari istimewa kami! 💍`);
-  window.open('https://wa.me/?text=' + msg, '_blank');
+async function savePhone(id) {
+  const input = document.getElementById('phone-' + id);
+  if (!input) return;
+  const phone = input.value.trim();
+  try {
+    await fetch(API_BASE + '/api/guests/' + id + '/phone', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone })
+    });
+    showToast('📱 No. HP tersimpan!');
+    // Update allGuests cache
+    const g = allGuests.find(g => String(g._id) === id);
+    if (g) g.phone = phone;
+  } catch(e) { showToast('⚠️ Gagal simpan no. HP'); }
+}
+
+function shareWA(name, url, waNum) {
+  // Fix URL: pastikan base URL tidak punya trailing path
+  const baseUrl = getBaseUrl().replace(/\/+$/, '');
+  const cleanUrl = baseUrl + '/?tamu=' + encodeURIComponent(name);
+
+  const msg = encodeURIComponent(
+    'Halo ' + name + '!\n\n' +
+    'Kamu diundang ke pernikahan Nathan & Ana\n' +
+    'Tanggal : 26 December 2026\n' +
+    'Lokasi  : GSJS Pakuwon Mall Surabaya\n\n' +
+    'Buka link undangan personal kamu:\n' +
+    cleanUrl + '\n\n' +
+    'Sampai jumpa di hari istimewa kami!'
+  );
+  if (waNum && waNum.length >= 10) {
+    window.open('https://wa.me/' + waNum + '?text=' + msg, '_blank');
+  } else {
+    showToast('⚠️ No. HP belum diisi! Membuka WA tanpa nomor...');
+    window.open('https://wa.me/?text=' + msg, '_blank');
+  }
 }
 
 function downloadQR(id, name) {
@@ -474,6 +707,11 @@ function downloadQR(id, name) {
   const canvas = qrEl.querySelector('canvas');
   if (!canvas) { showToast('⚠️ QR belum siap, tunggu sebentar!'); return; }
 
+  // Find guest ticketId from allGuests
+  const foundGuest = allGuests.find(g => g.name === name);
+  const tId = (foundGuest && foundGuest.rsvp && foundGuest.rsvp.ticketId)
+    ? foundGuest.rsvp.ticketId
+    : generateTicketId(name);
   const guestUrl = getGuestUrl(name);
   const off = document.createElement('canvas');
   off.width = 360; off.height = 460;
@@ -491,7 +729,6 @@ function downloadQR(id, name) {
 
   ctx.strokeStyle = '#fce8ec'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(30,92); ctx.lineTo(330,92); ctx.stroke();
-
   ctx.drawImage(canvas, 80, 105, 200, 200);
 
   ctx.fillStyle = '#1a1010'; ctx.font = 'bold 20px serif';
@@ -499,9 +736,8 @@ function downloadQR(id, name) {
   ctx.fillStyle = '#7a6a6a'; ctx.font = '11px sans-serif';
   ctx.fillText('Tamu Undangan', 180, 355);
 
-  ctx.fillStyle = '#bbb'; ctx.font = '9px sans-serif';
-  const shortUrl = guestUrl.length > 50 ? guestUrl.substring(0,47)+'...' : guestUrl;
-  ctx.fillText(shortUrl, 180, 380);
+  ctx.fillStyle = '#bbb'; ctx.font = '9px monospace';
+  ctx.fillText('TICKET: ' + tId, 180, 380);
 
   ctx.fillStyle = '#e8294a'; ctx.font = '20px serif';
   ctx.fillText('♥', 180, 420);
@@ -523,9 +759,9 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 function downloadAllQR() {
-  if (!guests.length) { showToast('⚠️ Belum ada tamu!'); return; }
-  showToast('⏳ Mendownload semua QR (' + guests.length + ' tamu)...');
-  guests.forEach((g, i) => { setTimeout(() => downloadQR(g._id, g.name), i * 600); });
+  if (!allGuests.length) { showToast('⚠️ Belum ada tamu!'); return; }
+  showToast('⏳ Mendownload semua QR (' + allGuests.length + ' tamu)...');
+  allGuests.forEach((g, i) => { setTimeout(() => downloadQR(String(g._id), g.name), i * 600); });
 }
 
 function escHtml(s) {
@@ -540,7 +776,8 @@ function showToast(msg) {
 }
 
 // INIT
-loadData();
+if (sessionStorage.getItem('admin_auth_na') === '1') loadData();
 </script>
+</div><!-- end main-content -->
 </body>
 </html>
