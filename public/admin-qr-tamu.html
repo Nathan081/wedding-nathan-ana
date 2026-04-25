@@ -37,13 +37,6 @@
 <script>
 (function(){
   const PASS = '082001', KEY = 'admin_auth_na';
-  function init() {
-    if (sessionStorage.getItem(KEY) === '1') return;
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('login-screen').style.display = 'flex';
-      document.getElementById('main-content').style.display = 'none';
-    });
-  }
   window.doLogin = function() {
     const val = document.getElementById('login-pass').value;
     if (val === PASS) {
@@ -57,7 +50,17 @@
     }
   };
   window.loginKeydown = function(e) { if(e.key==='Enter') window.doLogin(); };
-  init();
+
+  document.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem(KEY) === '1') {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('main-content').style.display = 'block';
+      loadData();
+    } else {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('main-content').style.display = 'none';
+    }
+  });
 })();
 </script>
 <style>
@@ -401,7 +404,21 @@ Rina Wati
 <div class="toast" id="toast"></div>
 
 <script>
-const API_BASE = window.location.origin;
+// Smart API_BASE detection
+// Jika file dibuka via file:// atau dari hosting statis (bukan Express server),
+// pakai SERVER_URL sebagai fallback. Ganti dengan URL server kamu.
+const SERVER_URL = 'http://localhost:3000'; // ← ganti jika deploy ke VPS/cloud
+function getAPIBase() {
+  const origin = window.location.origin;
+  // file:// protocol → pakai SERVER_URL
+  if (!origin || origin === 'null' || window.location.protocol === 'file:') return SERVER_URL;
+  // Jika origin adalah hosting statis (netlify, github pages, dll) → pakai SERVER_URL
+  const staticHosts = ['netlify.app', 'github.io', 'vercel.app', 'pages.dev', 'surge.sh'];
+  if (staticHosts.some(h => origin.includes(h))) return SERVER_URL;
+  return origin;
+}
+const API_BASE = getAPIBase();
+console.log('📡 API_BASE:', API_BASE);
 
 // Same deterministic ticketId as index.html — same name = same QR always
 function generateTicketId(name) {
@@ -420,6 +437,11 @@ async function loadData() {
       fetch(API_BASE + '/api/guests'),
       fetch(API_BASE + '/api/rsvp')
     ]);
+    
+    // Check response status
+    if (!gRes.ok) throw new Error('Failed to fetch guests: ' + gRes.status);
+    if (!rRes.ok) throw new Error('Failed to fetch rsvp: ' + rRes.status);
+    
     const adminGuests = await gRes.json(); // { _id, name }
     const rsvpGuests  = await rRes.json(); // { _id, ticketId, nama, hadir, checkedIn }
 
@@ -505,9 +527,9 @@ async function addGuest() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, phone })
     });
-    const json = await res.json();
     if (res.status === 409) { showToast('⚠️ Nama ini sudah ada!'); return; }
     if (!res.ok) { showToast('⚠️ Gagal tambah tamu.'); return; }
+    const json = await res.json();
     input.value = '';
     if (phoneInput) phoneInput.value = '';
     showToast('✅ ' + name + ' berhasil ditambahkan!');
@@ -526,6 +548,7 @@ async function addBulk() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ names: lines })
     });
+    if (!res.ok) { showToast('⚠️ Gagal tambah tamu.'); return; }
     const json = await res.json();
     textarea.value = '';
     showToast('✅ ' + json.added + ' tamu berhasil ditambahkan!');

@@ -1,4 +1,5 @@
 require('dotenv').config();
+
 const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
@@ -9,18 +10,62 @@ const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017';
 const DB_NAME = 'nathan_ana_wedding';
 
-app.use(cors());
+app.use(cors({
+  origin: '*',  // Allow all origins — admin & checkin bisa dari mana saja
+  methods: ['GET','POST','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization']
+}));
+app.options('*', cors()); // preflight
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 let db;
+let mongoClient;
+let isConnected = false;
 
-async function connectDB() {
-  const client = new MongoClient(MONGO_URI);
-  await client.connect();
-  db = client.db(DB_NAME);
-  console.log('✅ Connected to MongoDB:', DB_NAME);
+async function connectDB(retries = 5) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      console.log(`🔄 Attempting MongoDB connection (${i + 1}/${retries})...`);
+      
+      mongoClient = new MongoClient(MONGO_URI, {
+        connectTimeoutMS: 30000,
+        serverSelectionTimeoutMS: 15000,
+        socketTimeoutMS: 60000,
+        retryWrites: true,
+        maxPoolSize: 10,
+        family: 4,
+      });
+      
+      await mongoClient.connect();
+      
+      // Test connection
+      await mongoClient.db('admin').command({ ping: 1 });
+      
+      db = mongoClient.db(DB_NAME);
+      isConnected = true;
+      console.log('✅ Connected to MongoDB:', DB_NAME);
+      return;
+    } catch (error) {
+      console.error(`❌ Connection attempt ${i + 1} failed:`, error.message);
+      if (i < retries - 1) {
+        const delay = Math.pow(2, i) * 1000; // Exponential backoff
+        console.log(`⏳ Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  throw new Error('Failed to connect to MongoDB after ' + retries + ' attempts');
 }
+
+// Middleware to check DB connection (skip for health check)
+app.use((req, res, next) => {
+  if (req.path === '/api/health') return next(); // Allow health check always
+  if (!db || !isConnected) {
+    return res.status(503).json({ error: 'Database connection unavailable' });
+  }
+  next();
+});
 
 // ─── GUESTS ─────────────────────────────────────────────────────────────────
 
@@ -77,7 +122,13 @@ app.patch('/api/guests/:id/phone', async (req, res) => {
 
 app.delete('/api/guests/:id', async (req, res) => {
   try {
+    // Cari guest dulu untuk dapatkan namanya
+    const guest = await db.collection('guests').findOne({ _id: new ObjectId(req.params.id) });
     await db.collection('guests').deleteOne({ _id: new ObjectId(req.params.id) });
+    // Hapus RSVP yang berkaitan juga (match by nama)
+    if (guest && guest.name) {
+      await db.collection('rsvp').deleteOne({ nama: { $regex: new RegExp(`^${guest.name}$`, 'i') } });
+    }
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -97,6 +148,15 @@ app.get('/api/rsvp', async (req, res) => {
   try {
     const guests = await db.collection('rsvp').find().sort({ registeredAt: -1 }).toArray();
     res.json(guests);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// GET single RSVP by ticketId
+app.get('/api/rsvp/:ticketId', async (req, res) => {
+  try {
+    const guest = await db.collection('rsvp').findOne({ ticketId: req.params.ticketId });
+    if (!guest) return res.status(404).json({ error: 'Guest not found' });
+    res.json(guest);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -228,14 +288,67 @@ app.post('/api/greetings', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ─── HEALTH CHECK ────────────────────────────────────────────────────────────
+
+app.get('/api/health', async (req, res) => {
+  try {
+    if (!db || !isConnected) {
+      return res.status(503).json({ 
+        status: 'error', 
+        message: 'Database not connected',
+        connected: false 
+      });
+    }
+    
+    // Test DB connection
+    await db.admin().ping();
+    
+    res.json({ 
+      status: 'ok',
+      message: 'Server and database running',
+      connected: true,
+      timestamp: new Date().toISOString()
+    });
+  } catch (e) {
+    res.status(503).json({ 
+      status: 'error', 
+      message: e.message,
+      connected: false 
+    });
+  }
+});
+
 // ─── START ───────────────────────────────────────────────────────────────────
 
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running at http://localhost:${PORT}`);
-    console.log(`📁 Serving static files from ./public`);
-  });
-}).catch(err => {
-  console.error('❌ Failed to connect to MongoDB:', err.message);
-  process.exit(1);
-});
+async function startServer() {
+  try {
+    await connectDB(12); // Try up to 12 times with exponential backoff
+    
+    const server = app.listen(PORT, () => {
+      console.log(`🚀 Server running at http://localhost:${PORT}`);
+      console.log(`📁 Serving static files from ./public`);
+      console.log(`📊 Database: ${DB_NAME}`);
+      console.log('✅ Ready to receive requests...');
+    });
+
+    // Graceful shutdown
+    process.on('SIGTERM', async () => {
+      console.log('🛑 SIGTERM received, shutting down gracefully...');
+      server.close(async () => {
+        if (mongoClient) {
+          await mongoClient.close();
+          console.log('✅ MongoDB connection closed');
+        }
+        process.exit(0);
+      });
+    });
+
+  } catch (err) {
+    console.error('❌ Failed to start server:', err.message);
+    console.error('💡 Check your MONGO_URI in .env file');
+    console.error('💡 Make sure MongoDB Atlas allows connections from your IP');
+    process.exit(1);
+  }
+}
+
+startServer();

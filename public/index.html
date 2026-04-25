@@ -422,7 +422,17 @@ footer span{color:var(--rose);}
 
 <script>
 // ── CONFIG ──
-const API_BASE = window.location.origin;
+// Ganti SERVER_URL dengan URL server kamu jika deploy ke static hosting (Netlify, dll)
+const SERVER_URL = 'http://localhost:3000';
+function getAPIBase() {
+  const origin = window.location.origin;
+  if (!origin || origin === 'null' || window.location.protocol === 'file:') return SERVER_URL;
+  const staticHosts = ['netlify.app', 'github.io', 'vercel.app', 'pages.dev', 'surge.sh'];
+  if (staticHosts.some(h => origin.includes(h))) return SERVER_URL;
+  return origin;
+}
+const API_BASE = getAPIBase();
+console.log('📡 API_BASE (index):', API_BASE);
 
 // ── HELPERS ──
 function showToast(msg) {
@@ -616,7 +626,7 @@ function downloadRSVPQR() {
 }
 
 // ── INIT RSVP on page load ──
-(function initRSVP() {
+(async function initRSVP() {
   const params = new URLSearchParams(window.location.search);
   const tamu = params.get('tamu');
 
@@ -625,11 +635,6 @@ function downloadRSVPQR() {
     return;
   }
 
-  // Show personalized form
-  document.getElementById('rsvp-form').style.display = 'block';
-  document.getElementById('rsvp-guest-name').textContent = tamu;
-  document.getElementById('rsvp-name-display').textContent = tamu;
-
   // Show welcome banner
   const banner = document.getElementById('guest-banner');
   const nameEl = document.getElementById('guest-banner-name');
@@ -637,7 +642,59 @@ function downloadRSVPQR() {
     nameEl.textContent = tamu;
     banner.style.display = 'block';
   }
-})();
+
+  // Cek apakah tamu sudah pernah RSVP sebelumnya
+  try {
+    const ticketId = generateTicketId(tamu);
+    const res = await fetch(API_BASE + '/api/rsvp');
+    if (res.ok) {
+      const rsvpList = await res.json();
+      const existing = rsvpList.find(r =>
+        r.ticketId === ticketId ||
+        r.nama.toLowerCase() === tamu.toLowerCase()
+      );
+      if (existing) {
+        if (existing.hadir === 'Tidak Hadir') {
+          document.getElementById('rsvp-tidak-hadir').style.display = 'block';
+        } else {
+          // Tampilkan QR tiket lagi
+          rsvpGuestName = existing.nama;
+          rsvpTicketId = existing.ticketId;
+          document.getElementById('rsvp-qr').style.display = 'block';
+          document.getElementById('qr-ticket-name').textContent = existing.nama;
+          document.getElementById('qr-ticket-id').textContent = 'TICKET: ' + existing.ticketId;
+          const qrData = JSON.stringify({
+            id: existing.ticketId,
+            nama: existing.nama,
+            hadir: existing.hadir,
+            jumlah: existing.jumlah || 1,
+            event: 'Nathan & Ana Wedding',
+            date: '26 December 2026',
+            venue: 'GSJS Pakuwon Mall Surabaya'
+          });
+          const canvas = document.getElementById('rsvp-qr-canvas');
+          canvas.innerHTML = '';
+          if (typeof QRCode !== 'undefined') {
+            new QRCode(canvas, {
+              text: qrData,
+              width: 180, height: 180,
+              colorDark: '#1a1010', colorLight: '#ffffff',
+              correctLevel: QRCode.CorrectLevel.H
+            });
+          }
+        }
+        return;
+      }
+    }
+  } catch(e) {
+    console.warn('Tidak bisa cek RSVP existing:', e);
+  }
+
+  // Tamu belum RSVP — tampilkan form
+  document.getElementById('rsvp-form').style.display = 'block';
+  document.getElementById('rsvp-guest-name').textContent = tamu;
+  document.getElementById('rsvp-name-display').textContent = tamu;
+})()
 
 // ── GREETING WALL ──
 async function renderGreetings() {

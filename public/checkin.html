@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Check-In Tamu — Nathan & Ana Wedding</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <style>
 :root {
   --rose: #e8294a;
@@ -180,17 +180,20 @@ header p { opacity:0.85; font-size:0.88rem; margin-top:0.2rem; }
   <div id="tab-scanner">
     <div class="scanner-box">
       <h2>📷 Scan QR Tiket Tamu</h2>
-      <!-- html5-qrcode reader -->
-      <div id="qr-reader" style="width:100%;max-width:400px;margin:0 auto;display:none;border-radius:12px;overflow:hidden;"></div>
+      <div id="video-container" style="display:none;width:100%;position:relative;border-radius:12px;overflow:hidden;background:#000;">
+        <video id="scanner-video" playsinline autoplay muted
+          style="width:100%;height:300px;object-fit:cover;display:block;"></video>
+        <div class="scan-overlay">
+          <div class="scan-line"></div>
+        </div>
+      </div>
+      <canvas id="scanner-canvas" style="display:none;"></canvas>
 
       <div id="scanner-controls" style="text-align:center;padding:1rem 0;">
         <button class="btn" onclick="startCamera()" id="btn-start-cam">📷 Aktifkan Kamera</button>
-        <button class="btn" onclick="stopCamera()" id="btn-stop-cam" style="display:none;background:#888;margin-left:0.5rem;">⏹ Stop</button>
       </div>
 
-      <div id="scan-status" style="text-align:center;color:var(--muted);font-size:0.85rem;margin-top:0.5rem;">
-        ✅ Scanner siap — klik "Aktifkan Kamera"
-      </div>
+      <div id="scan-status" style="text-align:center;color:var(--muted);font-size:0.85rem;margin-top:0.5rem;"></div>
     </div>
 
     <!-- Result -->
@@ -262,7 +265,17 @@ header p { opacity:0.85; font-size:0.88rem; margin-top:0.2rem; }
 <div class="toast" id="toast"></div>
 
 <script>
-const API_BASE = window.location.origin;
+// Smart API_BASE detection
+const SERVER_URL = 'http://localhost:3000'; // ← ganti jika deploy ke VPS/cloud
+function getAPIBase() {
+  const origin = window.location.origin;
+  if (!origin || origin === 'null' || window.location.protocol === 'file:') return SERVER_URL;
+  const staticHosts = ['netlify.app', 'github.io', 'vercel.app', 'pages.dev', 'surge.sh'];
+  if (staticHosts.some(h => origin.includes(h))) return SERVER_URL;
+  return origin;
+}
+const API_BASE = getAPIBase();
+console.log('📡 API_BASE:', API_BASE);
 let pendingScanData = null;
 let scanInterval = null;
 let videoStream = null;
@@ -272,9 +285,11 @@ let cachedGuests = []; // local cache for speed
 async function getGuests() {
   try {
     const res = await fetch(API_BASE + '/api/rsvp');
+    if (!res.ok) throw new Error('Failed to fetch guests: ' + res.status);
     cachedGuests = await res.json();
     return cachedGuests;
   } catch(e) {
+    console.error('Error fetching guests:', e);
     console.warn('Using cached guests');
     return cachedGuests;
   }
@@ -282,11 +297,13 @@ async function getGuests() {
 
 async function checkinGuest(ticketId) {
   const res = await fetch(API_BASE + '/api/rsvp/checkin/' + ticketId, { method: 'PATCH' });
+  if (!res.ok) throw new Error('Check-in failed: ' + res.status);
   return res.json();
 }
 
 async function undoCheckinGuest(ticketId) {
   const res = await fetch(API_BASE + '/api/rsvp/undo/' + ticketId, { method: 'PATCH' });
+  if (!res.ok) throw new Error('Undo failed: ' + res.status);
   return res.json();
 }
 
@@ -296,11 +313,13 @@ async function checkinByName(nama) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ nama })
   });
+  if (!res.ok) throw new Error('Check-in failed: ' + res.status);
   return res.json();
 }
 
 async function resetAllCheckins() {
   const res = await fetch(API_BASE + '/api/rsvp/checkins', { method: 'DELETE' });
+  if (!res.ok) throw new Error('Reset failed: ' + res.status);
   return res.json();
 }
 
@@ -314,92 +333,77 @@ function switchTab(tab) {
   if (tab !== 'scanner') stopCamera();
 }
 
-// ── CAMERA using html5-qrcode ──
-let html5QrCode = null;
-let isScanning = false;
+// ── CAMERA using QR Scanner ──
 
 async function startCamera() {
-  if (isScanning) return;
-
   const btn = document.getElementById('btn-start-cam');
-  const stopBtn = document.getElementById('btn-stop-cam');
-  const status = document.getElementById('scan-status');
-
+  btn.textContent = '⏳ Memuat...';
   btn.disabled = true;
-  status.textContent = '⏳ Membuka kamera...';
 
   try {
-    html5QrCode = new Html5Qrcode('qr-reader');
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' } }
+    });
 
-    const config = {
-      fps: 10,
-      qrbox: { width: 250, height: 250 },
-      aspectRatio: 1.0,
-      supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+    videoStream = stream;
+    const video = document.getElementById('scanner-video');
+    video.srcObject = stream;
+    video.setAttribute('playsinline', '');
+    video.muted = true;
+
+    // Show container
+    document.getElementById('video-container').style.display = 'block';
+    btn.textContent = '⏹ Stop Kamera';
+    btn.disabled = false;
+    btn.onclick = stopCamera;
+    document.getElementById('scan-status').textContent = '🔍 Arahkan kamera ke QR tiket tamu...';
+
+    video.onloadedmetadata = () => {
+      video.play();
+      scanInterval = setInterval(() => scanFrame(video), 250);
     };
 
-    // Try rear camera first
-    const cameras = await Html5Qrcode.getCameras();
-    let cameraId;
-    if (cameras && cameras.length > 0) {
-      // Prefer rear camera
-      const rear = cameras.find(c => /back|rear|environment/i.test(c.label));
-      cameraId = rear ? rear.id : cameras[cameras.length - 1].id;
-    }
-
-    const startConfig = cameraId
-      ? cameraId
-      : { facingMode: 'environment' };
-
-    await html5QrCode.start(
-      startConfig,
-      config,
-      (decodedText) => {
-        // QR detected!
-        stopCamera();
-        processQR(decodedText);
-      },
-      (errorMessage) => {
-        // Scan error (normal, ignore)
-      }
-    );
-
-    document.getElementById('qr-reader').style.display = 'block';
-    btn.style.display = 'none';
-    btn.disabled = false;
-    stopBtn.style.display = 'inline-block';
-    status.textContent = '🔍 Arahkan kamera ke QR tiket tamu...';
-    isScanning = true;
-
   } catch(e) {
+    btn.textContent = '📷 Aktifkan Kamera';
     btn.disabled = false;
-    isScanning = false;
-    if (e.toString().includes('NotAllowed') || e.toString().includes('Permission')) {
-      status.textContent = '⚠️ Izin kamera ditolak. Aktifkan izin kamera di browser.';
-    } else if (e.toString().includes('NotFound')) {
-      status.textContent = '⚠️ Kamera tidak ditemukan. Gunakan tab Manual.';
-    } else {
-      status.textContent = '⚠️ Error: ' + e.toString().substring(0, 80);
-    }
-    console.error('Camera error:', e);
+    btn.onclick = startCamera;
+    document.getElementById('scan-status').textContent = '⚠️ Tidak bisa akses kamera: ' + (e.message || e);
   }
 }
 
-async function stopCamera() {
-  if (html5QrCode && isScanning) {
-    try {
-      await html5QrCode.stop();
-      html5QrCode.clear();
-    } catch(e) {}
-    isScanning = false;
-  }
-  document.getElementById('qr-reader').style.display = 'none';
-  document.getElementById('btn-start-cam').style.display = 'inline-block';
-  document.getElementById('btn-stop-cam').style.display = 'none';
-  document.getElementById('scan-status').textContent = '✅ Scanner siap — klik "Aktifkan Kamera"';
+function stopCamera() {
+  if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
+  if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
+  const video = document.getElementById('scanner-video');
+  if (video) { video.srcObject = null; }
+  document.getElementById('video-container').style.display = 'none';
+  const btn = document.getElementById('btn-start-cam');
+  btn.textContent = '📷 Aktifkan Kamera';
+  btn.disabled = false;
+  btn.onclick = startCamera;
+  document.getElementById('scan-status').textContent = '';
 }
 
-function scanFrame() {} // kept for compat
+function scanFrame(video) {
+  if (!video || video.readyState < 2 || video.paused) return;
+  if (!video.videoWidth || !video.videoHeight) return;
+
+  const canvas = document.getElementById('scanner-canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(imageData.data, imageData.width, imageData.height, {
+    inversionAttempts: 'attemptBoth'
+  });
+
+  if (code && code.data) {
+    stopCamera();
+    processQR(code.data);
+  }
+}
 
 // ── PROCESS QR ──
 async function processQR(rawData) {
@@ -409,7 +413,6 @@ async function processQR(rawData) {
   let data;
   try { data = JSON.parse(rawData); }
   catch(e) {
-    // Maybe it's a plain URL (fallback)
     showScanResult('invalid', '❌', 'QR Tidak Valid', [
       { label: 'Info', value: 'Format QR tidak dikenali. Pastikan QR dari undangan Nathan & Ana.' }
     ], false);
@@ -427,12 +430,11 @@ async function processQR(rawData) {
   const nama = data.nama || '-';
 
   try {
-    // Try to find in DB
-    const res = await fetch(API_BASE + '/api/rsvp');
-    const guests = await res.json();
-    const guest = guests.find(g => g.ticketId === ticketId);
+    // Coba cari langsung by ticketId (lebih cepat)
+    const singleRes = await fetch(API_BASE + '/api/rsvp/' + encodeURIComponent(ticketId));
 
-    if (guest) {
+    if (singleRes.ok) {
+      const guest = await singleRes.json();
       if (guest.checkedIn) {
         const checkinTime = guest.checkedInAt ? new Date(guest.checkedInAt).toLocaleTimeString('id-ID') : '-';
         showScanResult('already', '⚠️', 'Sudah Check-In Sebelumnya', [
@@ -446,11 +448,12 @@ async function processQR(rawData) {
         showScanResult('valid', '✅', 'Tamu Terverifikasi!', [
           { label: 'Nama', value: guest.nama },
           { label: 'Kehadiran', value: guest.hadir || 'Hadir' },
+          { label: 'Jumlah', value: (guest.jumlah || 1) + ' orang' },
           { label: 'Ticket ID', value: guest.ticketId }
         ], true);
       }
-    } else {
-      // Not in DB — valid QR (from admin-generated), auto-register on confirm
+    } else if (singleRes.status === 404) {
+      // Tidak ada di DB — QR dari admin (belum RSVP), auto-register on confirm
       pendingScanData = data;
       showScanResult('valid', '✅', 'Tamu Ditemukan (QR Admin)', [
         { label: 'Nama', value: nama },
@@ -458,6 +461,8 @@ async function processQR(rawData) {
         { label: 'Ticket ID', value: ticketId },
         { label: 'Catatan', value: 'Tamu belum RSVP online — akan otomatis terdaftar.' }
       ], true);
+    } else {
+      throw new Error('Server error: ' + singleRes.status);
     }
   } catch(e) {
     // Offline fallback
@@ -552,11 +557,10 @@ async function confirmCheckin() {
 function resetScan() {
   document.getElementById('scan-result').className = 'result-card';
   pendingScanData = null;
-  // Restart scanner
   startCamera();
 }
 
-
+// ── MANUAL CHECK-IN ──
 async function manualCheckin() {
   const val = document.getElementById('manual-input').value.trim();
   if (!val) { showToast('⚠️ Masukkan Ticket ID atau nama tamu!'); return; }
@@ -573,7 +577,38 @@ async function manualCheckin() {
   info.innerHTML = '';
 
   try {
-    // Try checkin by name first
+    // Jika input terlihat seperti ticketId (format NA-XXXXX-XXXXXX)
+    const isTicketId = /^NA-/i.test(val);
+
+    if (isTicketId) {
+      // Coba check-in langsung by ticketId
+      try {
+        const result = await checkinGuest(val);
+        if (result.ok) {
+          const guest = result.guest;
+          card.className = 'result-card valid';
+          icon.textContent = '✅';
+          status.textContent = (guest.nama || val) + ' — Check-In Berhasil!';
+          info.innerHTML = `<div class="result-row"><strong>Nama</strong><span>${guest.nama || '-'}</span></div>
+            <div class="result-row"><strong>Ticket ID</strong><span>${val}</span></div>
+            <div class="result-row"><strong>Pukul</strong><span>${new Date().toLocaleTimeString('id-ID')}</span></div>`;
+          document.getElementById('manual-input').value = '';
+          showToast('✅ ' + (guest.nama || val) + ' berhasil check-in!');
+          renderList();
+          return;
+        } else if (result.error === 'Already checked in') {
+          const guest = result.guest;
+          card.className = 'result-card already';
+          icon.textContent = '⚠️';
+          status.textContent = 'Sudah Check-In Sebelumnya';
+          info.innerHTML = `<div class="result-row"><strong>Nama</strong><span>${guest.nama}</span></div>
+            <div class="result-row"><strong>Check-in</strong><span>${guest.checkedInAt ? new Date(guest.checkedInAt).toLocaleTimeString('id-ID') : '-'}</span></div>`;
+          return;
+        }
+      } catch(e) { /* fallthrough ke pencarian nama */ }
+    }
+
+    // Coba check-in by nama
     const result = await checkinByName(val);
 
     if (result.ok) {
@@ -599,7 +634,7 @@ async function manualCheckin() {
       icon.textContent = '❌';
       status.textContent = 'Tamu Tidak Ditemukan';
       info.innerHTML = `<div class="result-row"><strong>Input</strong><span>${val}</span></div>
-        <div class="result-row"><strong>Info</strong><span>Tamu belum RSVP atau nama tidak cocok.</span></div>`;
+        <div class="result-row"><strong>Info</strong><span>Tamu belum RSVP atau nama/Ticket ID tidak cocok.</span></div>`;
     }
   } catch(e) {
     card.className = 'result-card invalid';
