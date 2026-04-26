@@ -528,27 +528,18 @@ async function submitRSVP() {
     document.getElementById('qr-ticket-id').textContent = 'TICKET: ' + ticketId;
 
     // QR data — format yang bisa dibaca checkin.html
-    const qrData = JSON.stringify({
-      id: ticketId,
-      nama: nama,
-      hadir: hadir,
-      jumlah: jumlah,
-      alergi: alergi,
-      event: 'Nathan & Ana Wedding',
-      date: '26 December 2026',
-      venue: 'GSJS Pakuwon Mall Surabaya'
-    });
+    const qrData = ticketId;
 
     const canvas = document.getElementById('rsvp-qr-canvas');
     canvas.innerHTML = '';
     if (typeof QRCode !== 'undefined') {
       new QRCode(canvas, {
         text: qrData,
-        width: 180,
-        height: 180,
+        width: 220,
+        height: 220,
         colorDark: '#1a1010',
         colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
+        correctLevel: QRCode.CorrectLevel.L
       });
     }
     showToast('🎉 RSVP berhasil! QR tiket kamu sudah siap!');
@@ -663,23 +654,15 @@ function downloadRSVPQR() {
           document.getElementById('rsvp-qr').style.display = 'block';
           document.getElementById('qr-ticket-name').textContent = existing.nama;
           document.getElementById('qr-ticket-id').textContent = 'TICKET: ' + existing.ticketId;
-          const qrData = JSON.stringify({
-            id: existing.ticketId,
-            nama: existing.nama,
-            hadir: existing.hadir,
-            jumlah: existing.jumlah || 1,
-            event: 'Nathan & Ana Wedding',
-            date: '26 December 2026',
-            venue: 'GSJS Pakuwon Mall Surabaya'
-          });
+          const qrData = existing.ticketId;
           const canvas = document.getElementById('rsvp-qr-canvas');
           canvas.innerHTML = '';
           if (typeof QRCode !== 'undefined') {
             new QRCode(canvas, {
               text: qrData,
-              width: 180, height: 180,
+              width: 220, height: 220,
               colorDark: '#1a1010', colorLight: '#ffffff',
-              correctLevel: QRCode.CorrectLevel.H
+              correctLevel: QRCode.CorrectLevel.L
             });
           }
         }
