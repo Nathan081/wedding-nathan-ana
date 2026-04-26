@@ -410,27 +410,10 @@ async function processQR(rawData) {
   stopCamera();
   document.getElementById('scan-status').textContent = '⏳ Memverifikasi...';
 
-  let data;
-  try { data = JSON.parse(rawData); }
-  catch(e) {
-    showScanResult('invalid', '❌', 'QR Tidak Valid', [
-      { label: 'Info', value: 'Format QR tidak dikenali. Pastikan QR dari undangan Nathan & Ana.' }
-    ], false);
-    return;
-  }
-
-  if (!data.id && !data.nama) {
-    showScanResult('invalid', '❌', 'QR Tidak Valid', [
-      { label: 'Info', value: 'QR tidak memiliki data yang valid.' }
-    ], false);
-    return;
-  }
-
-  const ticketId = data.id;
-  const nama = data.nama || '-';
+  // QR now contains plain ticketId string
+  const ticketId = rawData.trim();
 
   try {
-    // Coba cari langsung by ticketId (lebih cepat)
     const singleRes = await fetch(API_BASE + '/api/rsvp/' + encodeURIComponent(ticketId));
 
     if (singleRes.ok) {
@@ -444,7 +427,7 @@ async function processQR(rawData) {
           { label: 'Ticket ID', value: guest.ticketId }
         ], false);
       } else {
-        pendingScanData = { ...data, _dbGuest: guest };
+        pendingScanData = { id: ticketId, _dbGuest: guest };
         showScanResult('valid', '✅', 'Tamu Terverifikasi!', [
           { label: 'Nama', value: guest.nama },
           { label: 'Kehadiran', value: guest.hadir || 'Hadir' },
@@ -452,26 +435,16 @@ async function processQR(rawData) {
           { label: 'Ticket ID', value: guest.ticketId }
         ], true);
       }
-    } else if (singleRes.status === 404) {
-      // Tidak ada di DB — QR dari admin (belum RSVP), auto-register on confirm
-      pendingScanData = data;
-      showScanResult('valid', '✅', 'Tamu Ditemukan (QR Admin)', [
-        { label: 'Nama', value: nama },
-        { label: 'Kehadiran', value: data.hadir || 'Hadir' },
-        { label: 'Ticket ID', value: ticketId },
-        { label: 'Catatan', value: 'Tamu belum RSVP online — akan otomatis terdaftar.' }
-      ], true);
     } else {
-      throw new Error('Server error: ' + singleRes.status);
+      showScanResult('invalid', '❌', 'Tamu Tidak Ditemukan', [
+        { label: 'Ticket ID', value: ticketId },
+        { label: 'Info', value: 'Tamu belum RSVP atau QR tidak valid.' }
+      ], false);
     }
   } catch(e) {
-    // Offline fallback
-    pendingScanData = data;
-    showScanResult('valid', '✅', 'QR Valid (Mode Offline)', [
-      { label: 'Nama', value: nama },
-      { label: 'Ticket ID', value: ticketId },
-      { label: 'Catatan', value: 'Server tidak terjangkau — check-in akan dicoba.' }
-    ], true);
+    showScanResult('invalid', '❌', 'Gagal Terhubung ke Server', [
+      { label: 'Info', value: 'Pastikan koneksi internet aktif.' }
+    ], false);
   }
 }
 
