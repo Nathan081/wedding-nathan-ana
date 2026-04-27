@@ -265,14 +265,16 @@ header p { opacity:0.85; font-size:0.88rem; margin-top:0.2rem; }
 <div class="toast" id="toast"></div>
 
 <script>
-// Smart API_BASE detection
+// ── CONFIG ──
+// Semua file (index, admin, checkin) ada di folder public/ dan diakses via Express.
+// origin otomatis = URL server → tidak perlu hardcode apapun.
 const SERVER_URL = 'http://localhost:3000'; // ← ganti jika deploy ke VPS/cloud
 function getAPIBase() {
   const origin = window.location.origin;
   if (!origin || origin === 'null' || window.location.protocol === 'file:') return SERVER_URL;
   const staticHosts = ['netlify.app', 'github.io', 'vercel.app', 'pages.dev', 'surge.sh'];
   if (staticHosts.some(h => origin.includes(h))) return SERVER_URL;
-  return origin;
+  return origin; // ← semua file via Express: origin = server URL ✓
 }
 const API_BASE = getAPIBase();
 console.log('📡 API_BASE:', API_BASE);

@@ -1,5 +1,9 @@
 require('dotenv').config();
 
+// Fix DNS issue
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
+
 const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
@@ -29,12 +33,11 @@ async function connectDB(retries = 5) {
       console.log(`🔄 Attempting MongoDB connection (${i + 1}/${retries})...`);
       
       mongoClient = new MongoClient(MONGO_URI, {
-        connectTimeoutMS: 30000,
-        serverSelectionTimeoutMS: 15000,
-        socketTimeoutMS: 60000,
+        connectTimeoutMS: 10000,
+        serverSelectionTimeoutMS: 5000,
         retryWrites: true,
         maxPoolSize: 10,
-        family: 4,
+        minPoolSize: 2
       });
       
       await mongoClient.connect();
@@ -142,21 +145,12 @@ app.delete('/api/guests', async (req, res) => {
 });
 
 // ─── RSVP ────────────────────────────────────────────────────────────────────
-// IMPORTANT: Specific routes must be BEFORE :ticketId param routes
+// ─── RSVP ROUTES — urutan KRITIS: spesifik dulu, param (:ticketId) paling bawah ──
 
 app.get('/api/rsvp', async (req, res) => {
   try {
     const guests = await db.collection('rsvp').find().sort({ registeredAt: -1 }).toArray();
     res.json(guests);
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// GET single RSVP by ticketId
-app.get('/api/rsvp/:ticketId', async (req, res) => {
-  try {
-    const guest = await db.collection('rsvp').findOne({ ticketId: req.params.ticketId });
-    if (!guest) return res.status(404).json({ error: 'Guest not found' });
-    res.json(guest);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -193,9 +187,9 @@ app.post('/api/rsvp', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── SPECIFIC ROUTES FIRST (before :ticketId) ──
+// ── SPECIFIC routes — WAJIB di atas /:ticketId ──
 
-// DELETE all check-ins (reset) — must be before /:ticketId
+// DELETE all check-ins (reset)
 app.delete('/api/rsvp/checkins', async (req, res) => {
   try {
     await db.collection('rsvp').updateMany({}, { $set: { checkedIn: false }, $unset: { checkedInAt: '' } });
@@ -203,12 +197,13 @@ app.delete('/api/rsvp/checkins', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// PATCH check-in by name — must be before /:ticketId
+// PATCH check-in by name
 app.patch('/api/rsvp/checkin-name', async (req, res) => {
   try {
     const { nama } = req.body;
+    if (!nama) return res.status(400).json({ error: 'nama required' });
     const guest = await db.collection('rsvp').findOne({
-      nama: { $regex: new RegExp(nama, 'i') }
+      nama: { $regex: new RegExp(nama.trim(), 'i') }
     });
     if (!guest) return res.status(404).json({ error: 'Guest not found' });
     if (guest.checkedIn) return res.status(409).json({ error: 'Already checked in', guest });
@@ -216,7 +211,7 @@ app.patch('/api/rsvp/checkin-name', async (req, res) => {
       { _id: guest._id },
       { $set: { checkedIn: true, checkedInAt: new Date().toISOString() } }
     );
-    res.json({ ok: true, guest });
+    res.json({ ok: true, guest: { ...guest, checkedIn: true } });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -247,13 +242,24 @@ app.patch('/api/rsvp/undo/:ticketId', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── PARAM routes — :ticketId selalu paling bawah ──
+
+// GET single RSVP by ticketId
+app.get('/api/rsvp/:ticketId', async (req, res) => {
+  try {
+    const guest = await db.collection('rsvp').findOne({ ticketId: req.params.ticketId });
+    if (!guest) return res.status(404).json({ error: 'Guest not found' });
+    res.json(guest);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // PATCH update RSVP data
 app.patch('/api/rsvp/:ticketId', async (req, res) => {
   try {
     const { hadir, jumlah, alergi } = req.body;
     const update = {};
-    if (hadir) update.hadir = hadir;
-    if (jumlah) update.jumlah = jumlah;
+    if (hadir !== undefined) update.hadir = hadir;
+    if (jumlah !== undefined) update.jumlah = jumlah;
     if (alergi !== undefined) update.alergi = alergi;
     await db.collection('rsvp').updateOne(
       { ticketId: req.params.ticketId },
@@ -322,7 +328,7 @@ app.get('/api/health', async (req, res) => {
 
 async function startServer() {
   try {
-    await connectDB(12); // Try up to 12 times with exponential backoff
+    await connectDB();
     
     const server = app.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);

@@ -422,17 +422,18 @@ footer span{color:var(--rose);}
 
 <script>
 // ── CONFIG ──
-// Ganti SERVER_URL dengan URL server kamu jika deploy ke static hosting (Netlify, dll)
-const SERVER_URL = 'http://localhost:3000';
+// Semua file (index, admin, checkin) ada di folder public/ dan diakses via Express.
+// origin otomatis = URL server → tidak perlu hardcode apapun.
+const SERVER_URL = 'http://localhost:3000'; // ← ganti jika deploy ke VPS/cloud
 function getAPIBase() {
   const origin = window.location.origin;
   if (!origin || origin === 'null' || window.location.protocol === 'file:') return SERVER_URL;
   const staticHosts = ['netlify.app', 'github.io', 'vercel.app', 'pages.dev', 'surge.sh'];
   if (staticHosts.some(h => origin.includes(h))) return SERVER_URL;
-  return origin;
+  return origin; // ← semua file via Express: origin = server URL ✓
 }
 const API_BASE = getAPIBase();
-console.log('📡 API_BASE (index):', API_BASE);
+console.log('📡 API_BASE:', API_BASE);
 
 // ── HELPERS ──
 function showToast(msg) {
@@ -504,15 +505,21 @@ async function submitRSVP() {
   rsvpGuestName = nama;
   rsvpTicketId = ticketId;
 
-  // Save to server
+  // Save to server — WAJIB berhasil agar QR valid saat check-in
   try {
-    await fetch(API_BASE + '/api/rsvp', {
+    const res = await fetch(API_BASE + '/api/rsvp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ticketId, nama, hadir, jumlah, alergi, email: '' })
     });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Server error ' + res.status);
+    }
   } catch(e) {
-    console.warn('Server unavailable, proceeding offline');
+    console.error('RSVP gagal disimpan:', e);
+    showToast('❌ Gagal menyimpan RSVP: ' + e.message + '. Coba lagi ya!');
+    return;
   }
 
   // Show appropriate state
@@ -527,13 +534,11 @@ async function submitRSVP() {
     document.getElementById('qr-ticket-name').textContent = nama;
     document.getElementById('qr-ticket-id').textContent = 'TICKET: ' + ticketId;
 
-    // QR data — format yang bisa dibaca checkin.html
+    // QR data — format JSON sama persis seperti admin agar bisa dibaca checkin.html
     const qrData = JSON.stringify({
       id: ticketId,
       nama: nama,
       hadir: hadir,
-      jumlah: jumlah,
-      alergi: alergi,
       event: 'Nathan & Ana Wedding',
       date: '26 December 2026',
       venue: 'GSJS Pakuwon Mall Surabaya'
@@ -544,11 +549,11 @@ async function submitRSVP() {
     if (typeof QRCode !== 'undefined') {
       new QRCode(canvas, {
         text: qrData,
-        width: 180,
-        height: 180,
+        width: 220,
+        height: 220,
         colorDark: '#1a1010',
         colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
+        correctLevel: QRCode.CorrectLevel.M
       });
     }
     showToast('🎉 RSVP berhasil! QR tiket kamu sudah siap!');
@@ -667,7 +672,6 @@ function downloadRSVPQR() {
             id: existing.ticketId,
             nama: existing.nama,
             hadir: existing.hadir,
-            jumlah: existing.jumlah || 1,
             event: 'Nathan & Ana Wedding',
             date: '26 December 2026',
             venue: 'GSJS Pakuwon Mall Surabaya'
@@ -677,9 +681,9 @@ function downloadRSVPQR() {
           if (typeof QRCode !== 'undefined') {
             new QRCode(canvas, {
               text: qrData,
-              width: 180, height: 180,
+              width: 220, height: 220,
               colorDark: '#1a1010', colorLight: '#ffffff',
-              correctLevel: QRCode.CorrectLevel.H
+              correctLevel: QRCode.CorrectLevel.M
             });
           }
         }

@@ -404,18 +404,16 @@ Rina Wati
 <div class="toast" id="toast"></div>
 
 <script>
-// Smart API_BASE detection
-// Jika file dibuka via file:// atau dari hosting statis (bukan Express server),
-// pakai SERVER_URL sebagai fallback. Ganti dengan URL server kamu.
+// ── CONFIG ──
+// Semua file (index, admin, checkin) ada di folder public/ dan diakses via Express.
+// origin otomatis = URL server → tidak perlu hardcode apapun.
 const SERVER_URL = 'http://localhost:3000'; // ← ganti jika deploy ke VPS/cloud
 function getAPIBase() {
   const origin = window.location.origin;
-  // file:// protocol → pakai SERVER_URL
   if (!origin || origin === 'null' || window.location.protocol === 'file:') return SERVER_URL;
-  // Jika origin adalah hosting statis (netlify, github pages, dll) → pakai SERVER_URL
   const staticHosts = ['netlify.app', 'github.io', 'vercel.app', 'pages.dev', 'surge.sh'];
   if (staticHosts.some(h => origin.includes(h))) return SERVER_URL;
-  return origin;
+  return origin; // ← semua file via Express: origin = server URL ✓
 }
 const API_BASE = getAPIBase();
 console.log('📡 API_BASE:', API_BASE);
@@ -473,6 +471,22 @@ async function loadData() {
       }
     });
 
+    // Auto-create RSVP untuk tamu admin yang belum punya RSVP
+    // Sehingga QR dari admin SELALU valid di checkin
+    const missingRSVP = merged.filter(g => g.source === 'admin' && !g.rsvp);
+    if (missingRSVP.length > 0) {
+      await Promise.all(missingRSVP.map(g => ensureRSVP(g.name)));
+      // Reload RSVP setelah sync
+      const rRes2 = await fetch(API_BASE + '/api/rsvp');
+      const rsvpGuests2 = await rRes2.json();
+      merged.forEach(g => {
+        if (!g.rsvp) {
+          const found = rsvpGuests2.find(r => r.nama.toLowerCase() === g.name.toLowerCase());
+          if (found) g.rsvp = found;
+        }
+      });
+    }
+
     allGuests = merged;
 
     const savedUrl = localStorage.getItem('nathan_ana_base_url') || '';
@@ -514,6 +528,17 @@ function getGuestUrl(name) {
   return getBaseUrl() + '/?tamu=' + encodeURIComponent(name);
 }
 
+// Auto-create RSVP di MongoDB saat admin tambah tamu
+// Agar QR dari admin langsung valid untuk di-scan checkin
+async function ensureRSVP(name) {
+  const ticketId = generateTicketId(name);
+  await fetch(API_BASE + '/api/rsvp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ticketId, nama: name, hadir: 'Hadir', jumlah: 1, alergi: '' })
+  });
+}
+
 async function addGuest() {
   const input = document.getElementById('guest-input');
   const phoneInput = document.getElementById('phone-input');
@@ -529,7 +554,8 @@ async function addGuest() {
     });
     if (res.status === 409) { showToast('⚠️ Nama ini sudah ada!'); return; }
     if (!res.ok) { showToast('⚠️ Gagal tambah tamu.'); return; }
-    const json = await res.json();
+    // Auto-create RSVP agar QR langsung valid di checkin
+    await ensureRSVP(name);
     input.value = '';
     if (phoneInput) phoneInput.value = '';
     showToast('✅ ' + name + ' berhasil ditambahkan!');
@@ -550,6 +576,8 @@ async function addBulk() {
     });
     if (!res.ok) { showToast('⚠️ Gagal tambah tamu.'); return; }
     const json = await res.json();
+    // Auto-create RSVP untuk semua tamu baru
+    await Promise.all(json.guests.map(g => ensureRSVP(g.name)));
     textarea.value = '';
     showToast('✅ ' + json.added + ' tamu berhasil ditambahkan!');
     loadData();
@@ -671,9 +699,9 @@ function renderGuests() {
         });
         new QRCode(qrEl, {
           text: qrText,
-          width: 160, height: 160,
+          width: 220, height: 220,
           colorDark: '#1a1010', colorLight: '#ffffff',
-          correctLevel: QRCode.CorrectLevel.H
+          correctLevel: QRCode.CorrectLevel.M
         });
         qrInstances[String(guest._id)] = { name: guest.name, url: guestUrl };
       } catch(e) {}
