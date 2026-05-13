@@ -2,763 +2,843 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Check-In Tamu — Nathan & Ana Wedding</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>Check-In · Nathan &amp; Ana</title>
 <script src="/jsQR.min.js"></script>
+<script>
+// If local jsQR failed, load from CDN
+window.addEventListener('load', function() {
+  if (typeof jsQR === 'undefined') {
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+    document.head.appendChild(s);
+  }
+});
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --rose: #e8294a;
-  --rose-light: #fce8ec;
-  --green: #27ae60;
-  --green-light: #e8f8ef;
-  --cream: #fdf8f5;
-  --dark: #1a1010;
-  --muted: #7a6a6a;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0e0c0a; --card:#1a1612; --card2:#211d17;
+  --gold:#c9a96e; --gold-dim:#a07c3a; --gold-light:rgba(201,169,110,0.12);
+  --gold-border:rgba(201,169,110,0.18); --text:#f5edd8; --muted:#8a7a5a;
+  --green:#4caf7d; --green-light:rgba(76,175,125,0.12);
+  --red:#e05252; --red-light:rgba(224,82,82,0.12);
+  --amber:#e0a84a; --amber-light:rgba(224,168,74,0.12);
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Jost',sans-serif; background:var(--cream); color:var(--dark); min-height:100vh; }
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Jost',sans-serif;overflow-x:hidden;}
 
-header {
-  background: linear-gradient(135deg, var(--rose), #c41e3a);
-  color:#fff; padding:1.5rem 2rem; text-align:center;
-}
-header h1 { font-family:'Playfair Display',serif; font-size:1.8rem; }
-header p { opacity:0.85; font-size:0.88rem; margin-top:0.2rem; }
+/* HEADER */
+#app-header{position:sticky;top:0;z-index:50;background:rgba(14,12,10,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--gold-border);padding:1rem 1.2rem 0;}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;}
+.header-top h1{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:400;font-style:italic;color:var(--gold);letter-spacing:.05em;}
+#conn-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);transition:background .3s;}
+#conn-dot.online{background:var(--green);animation:pdot 2s infinite;}
+#conn-dot.offline{background:var(--red);}
+@keyframes pdot{0%,100%{box-shadow:0 0 0 0 rgba(76,175,125,.5)}50%{box-shadow:0 0 0 5px rgba(76,175,125,0)}}
 
-.container { max-width:800px; margin:0 auto; padding:1.5rem; }
+/* NAV TABS */
+.nav-tabs{display:flex;gap:0;background:var(--card);border-radius:12px 12px 0 0;padding:4px 4px 0;border:1px solid var(--gold-border);border-bottom:none;}
+.nav-tab{flex:1;padding:.6rem .4rem;border:none;background:transparent;color:var(--muted);font-family:'Jost',sans-serif;font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:8px 8px 0 0;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.3rem;}
+.nav-tab.active{background:var(--gold);color:#0e0c0a;font-weight:700;}
+.lock-icon{font-size:.6rem;}
 
-/* TABS */
-.tabs { display:flex; gap:0; background:#fff; border-radius:14px; padding:5px; box-shadow:0 2px 12px rgba(232,41,74,0.1); margin-bottom:1.5rem; }
-.tab { flex:1; padding:0.75rem; border:none; border-radius:10px; font-family:'Jost',sans-serif; font-size:0.9rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
-.tab.active { background:var(--rose); color:#fff; }
-.tab:not(.active) { background:transparent; color:var(--muted); }
+/* CONTENT */
+#main-content{padding:1.2rem;min-height:calc(100vh - 120px);}
+.section{display:none;}.section.active{display:block;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-bottom:1.2rem;}
+.stat-card{background:var(--card);border:1px solid var(--gold-border);border-radius:12px;padding:.9rem .5rem;text-align:center;}
+.stat-num{font-size:1.6rem;font-weight:600;font-family:'Cormorant Garamond',serif;color:var(--gold);}
+.stat-label{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:.2rem;}
+
+/* FILTER PILLS */
+.filter-row{display:flex;gap:.5rem;margin-bottom:1rem;overflow-x:auto;padding-bottom:.3rem;scrollbar-width:none;}
+.filter-row::-webkit-scrollbar{display:none;}
+.pill{border:1px solid var(--gold-border);background:transparent;color:var(--muted);font-family:'Jost',sans-serif;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;padding:.38rem .85rem;border-radius:50px;cursor:pointer;white-space:nowrap;transition:all .2s;}
+.pill.active{background:var(--gold);color:#0e0c0a;border-color:var(--gold);font-weight:600;}
+
+/* SEARCH */
+.search-wrap{position:relative;margin-bottom:1rem;}
+.search-input{width:100%;padding:.72rem 1rem .72rem 2.4rem;background:var(--card);border:1px solid var(--gold-border);border-radius:10px;color:var(--text);font-family:'Jost',sans-serif;font-size:.85rem;outline:none;}
+.search-input::placeholder{color:var(--muted);}
+.search-input:focus{border-color:var(--gold);}
+.search-icon{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;}
+.guest-count{font-size:.72rem;color:var(--muted);letter-spacing:.08em;margin-bottom:.8rem;}
+
+/* GUEST ITEM */
+.guest-item{display:flex;align-items:center;gap:.8rem;background:var(--card);border:1px solid var(--gold-border);border-radius:12px;padding:.8rem .9rem;margin-bottom:.55rem;transition:border-color .2s;}
+.guest-item.checked{border-color:rgba(76,175,125,.25);background:#111a14;}
+.guest-avatar{width:38px;height:38px;border-radius:50%;background:var(--gold-light);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:600;color:var(--gold);flex-shrink:0;}
+.guest-info{flex:1;min-width:0;}
+.guest-name{font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.guest-meta{display:flex;align-items:center;gap:.35rem;margin-top:.2rem;flex-wrap:wrap;}
+.badge{font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;padding:.18rem .5rem;border-radius:50px;font-weight:600;}
+.badge.hadir{background:var(--green-light);color:var(--green);}
+.badge.tidak{background:var(--red-light);color:var(--red);}
+.badge.pending{background:var(--amber-light);color:var(--amber);}
+.badge.cin{background:var(--green-light);color:var(--green);}
+.badge.cout{background:rgba(138,122,90,.12);color:var(--muted);}
+.ticket-id{font-size:.58rem;color:var(--muted);font-family:monospace;}
+.guest-right{display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;flex-shrink:0;}
+.pax-badge{background:var(--gold-light);border:1px solid var(--gold-border);color:var(--gold);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:600;}
+.btn-undo{font-size:.58rem;background:transparent;border:1px solid var(--gold-border);color:var(--muted);border-radius:6px;padding:.18rem .45rem;cursor:pointer;}
 
 /* SCANNER */
-.scanner-box {
-  background:#fff; border-radius:16px; padding:1.5rem;
-  box-shadow:0 4px 20px rgba(232,41,74,0.09); margin-bottom:1.5rem;
-}
-.scanner-box h2 { font-size:1rem; font-weight:600; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
+.scanner-wrap{background:var(--card);border:1px solid var(--gold-border);border-radius:16px;overflow:hidden;margin-bottom:1rem;position:relative;}
+.scanner-header{padding:.9rem 1.1rem;border-bottom:1px solid var(--gold-border);display:flex;align-items:center;justify-content:space-between;}
+.scanner-header h2{font-size:.82rem;font-weight:600;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;}
+#scanner-video{width:100%;display:block;aspect-ratio:1/1;object-fit:cover;background:#000;}
+.scan-overlay{position:absolute;inset:0;pointer-events:none;}
+.scan-frame{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:55%;aspect-ratio:1/1;}
+.scan-frame::before,.scan-frame::after,.scan-frame span::before,.scan-frame span::after{content:'';position:absolute;width:18px;height:18px;border-color:var(--gold);border-style:solid;}
+.scan-frame::before{top:0;left:0;border-width:2px 0 0 2px;}
+.scan-frame::after{top:0;right:0;border-width:2px 2px 0 0;}
+.scan-frame span::before{bottom:0;left:0;border-width:0 0 2px 2px;}
+.scan-frame span::after{bottom:0;right:0;border-width:0 2px 2px 0;}
+.scan-line-anim{position:absolute;left:22%;right:22%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);top:22%;animation:sline 2s ease-in-out infinite;}
+@keyframes sline{0%,100%{top:22%;opacity:.3}50%{top:78%;opacity:1}}
+#scan-status{padding:.7rem 1rem;text-align:center;font-size:.78rem;color:var(--muted);border-top:1px solid var(--gold-border);}
+.scanner-controls{padding:.8rem 1rem;display:flex;gap:.6rem;}
+.btn-cam{flex:1;padding:.7rem;border:none;border-radius:10px;font-family:'Jost',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;letter-spacing:.05em;transition:all .2s;}
+.btn-start{background:var(--gold);color:#0e0c0a;}
+.btn-stop{background:var(--card2);color:var(--muted);border:1px solid var(--gold-border);}
 
-#video-container {
-  position:relative; width:100%; max-width:400px; margin:0 auto;
-  border-radius:12px; overflow:hidden; background:#000;
-}
-#scanner-video { width:100%; display:block; }
-.scan-overlay {
-  position:absolute; inset:0;
-  border:3px solid var(--rose);
-  border-radius:12px;
-  box-shadow: inset 0 0 0 60px rgba(0,0,0,0.4);
-}
-.scan-line {
-  position:absolute; left:10%; right:10%; height:2px;
-  background:var(--rose);
-  animation:scan 2s linear infinite;
-}
-@keyframes scan { 0%{top:20%} 100%{top:80%} }
+/* SCAN RESULT */
+#scan-result{display:none;background:var(--card);border:1px solid var(--gold-border);border-radius:16px;padding:1.2rem;margin-bottom:1rem;}
+.result-icon{text-align:center;font-size:2.2rem;margin-bottom:.4rem;}
+.result-status{text-align:center;font-size:1rem;font-weight:700;margin-bottom:.8rem;}
+.result-info{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.9rem;}
+.result-row{display:flex;justify-content:space-between;font-size:.8rem;}
+.result-row span:first-child{color:var(--muted);}
+.result-row span:last-child{font-weight:600;}
+.result-actions{display:flex;gap:.6rem;}
+.btn-confirm{flex:1;padding:.72rem;background:var(--gold);color:#0e0c0a;border:none;border-radius:10px;font-weight:700;font-family:'Jost',sans-serif;font-size:.85rem;cursor:pointer;}
+.btn-cancel{padding:.72rem 1rem;background:var(--card2);color:var(--muted);border:1px solid var(--gold-border);border-radius:10px;font-family:'Jost',sans-serif;font-size:.85rem;cursor:pointer;}
 
-.btn { padding:0.8rem 1.4rem; background:var(--rose); color:#fff; border:none; border-radius:10px; font-family:'Jost',sans-serif; font-size:0.92rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
-.btn:hover { background:#cc1e3a; }
-.btn-green { background:var(--green); }
-.btn-green:hover { background:#219a52; }
-.btn-outline { background:transparent; color:var(--rose); border:1.5px solid var(--rose); }
+/* MANUAL */
+.manual-card{background:var(--card);border:1px solid var(--gold-border);border-radius:16px;padding:1.1rem;margin-bottom:1rem;}
+.manual-card h3{font-size:.78rem;font-weight:600;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.85rem;}
+.input-row{display:flex;gap:.55rem;}
+.manual-input{flex:1;padding:.7rem .9rem;background:var(--card2);border:1px solid var(--gold-border);border-radius:10px;color:var(--text);font-family:'Jost',sans-serif;font-size:.85rem;outline:none;}
+.manual-input::placeholder{color:var(--muted);}
+.manual-input:focus{border-color:var(--gold);}
+.btn-manual{padding:.7rem 1rem;background:var(--gold);color:#0e0c0a;border:none;border-radius:10px;font-weight:700;font-family:'Jost',sans-serif;font-size:.8rem;cursor:pointer;}
+#manual-result{margin-top:.75rem;font-size:.8rem;text-align:center;color:var(--muted);display:none;}
 
-/* RESULT CARD */
-.result-card {
-  border-radius:16px; padding:1.5rem; margin-bottom:1.5rem;
-  display:none; animation:pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
-}
-@keyframes pop { from{transform:scale(0.8);opacity:0;} to{transform:scale(1);opacity:1;} }
-.result-card.valid { background:var(--green-light); border:2px solid var(--green); display:block; }
-.result-card.invalid { background:#fff0f0; border:2px solid #e74c3c; display:block; }
-.result-card.already { background:#fff8e1; border:2px solid #f39c12; display:block; }
+/* STATUS SECTION */
+.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1rem;}
+.status-card{background:var(--card);border:1px solid var(--gold-border);border-radius:14px;padding:1rem;}
+.status-card .num{font-size:2rem;font-weight:600;font-family:'Cormorant Garamond',serif;color:var(--gold);}
+.status-card .lbl{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:.2rem;}
+.progress-wrap{background:var(--card);border:1px solid var(--gold-border);border-radius:14px;padding:1rem 1.1rem;margin-bottom:1rem;}
+.progress-label{display:flex;justify-content:space-between;font-size:.76rem;color:var(--muted);margin-bottom:.6rem;}
+.progress-bar{height:5px;background:var(--card2);border-radius:50px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:50px;transition:width .6s ease;}
+.recent-title{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.7rem;}
+.recent-item{display:flex;align-items:center;gap:.7rem;padding:.55rem 0;border-bottom:1px solid var(--gold-border);}
+.recent-item:last-child{border-bottom:none;}
+.recent-avatar{width:32px;height:32px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:600;color:var(--green);flex-shrink:0;}
+.recent-name{font-size:.82rem;font-weight:600;flex:1;}
+.recent-time{font-size:.68rem;color:var(--muted);}
+.reset-btn{width:100%;margin-top:1rem;padding:.78rem;background:transparent;border:1px solid rgba(224,82,82,.3);color:var(--red);border-radius:10px;font-family:'Jost',sans-serif;font-size:.8rem;cursor:pointer;}
 
-.result-icon { font-size:3rem; text-align:center; margin-bottom:0.5rem; }
-.result-status { font-size:1.2rem; font-weight:700; text-align:center; margin-bottom:1rem; }
-.result-info { display:grid; gap:0.5rem; }
-.result-row { display:flex; gap:0.5rem; font-size:0.9rem; }
-.result-row strong { min-width:100px; color:var(--muted); }
+/* MEJA SECTION */
+.meja-search-wrap{position:relative;margin-bottom:1rem;}
+.meja-empty{text-align:center;padding:2rem;color:var(--muted);font-size:.82rem;}
+.meja-table-card{background:var(--card);border:1px solid var(--gold-border);border-radius:14px;margin-bottom:.85rem;overflow:hidden;}
+.meja-table-header{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1rem;border-bottom:1px solid var(--gold-border);background:var(--gold-light);}
+.meja-table-title{font-size:.78rem;font-weight:700;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;}
+.meja-table-count{font-size:.65rem;color:var(--muted);background:var(--card2);padding:.2rem .5rem;border-radius:50px;border:1px solid var(--gold-border);}
+.meja-guest-row{display:flex;align-items:center;gap:.7rem;padding:.62rem 1rem;border-bottom:1px solid rgba(201,169,110,0.07);}
+.meja-guest-row:last-child{border-bottom:none;}
+.meja-avatar{width:30px;height:30px;border-radius:50%;background:var(--gold-light);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--gold);flex-shrink:0;}
+.meja-avatar.cin{background:var(--green-light);border-color:rgba(76,175,125,.3);color:var(--green);}
+.meja-guest-name{flex:1;font-size:.82rem;font-weight:500;}
+.meja-badge{font-size:.55rem;letter-spacing:.07em;text-transform:uppercase;padding:.15rem .45rem;border-radius:50px;font-weight:600;}
+.meja-badge.cin{background:var(--green-light);color:var(--green);}
+.meja-badge.out{background:rgba(138,122,90,.12);color:var(--muted);}
+.meja-no-table{background:var(--card);border:1px solid var(--gold-border);border-radius:14px;padding:.9rem 1rem;margin-bottom:.85rem;}
+.meja-no-table-title{font-size:.7rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem;}
 
-/* MANUAL INPUT */
-.manual-box {
-  background:#fff; border-radius:16px; padding:1.5rem;
-  box-shadow:0 4px 20px rgba(232,41,74,0.09); margin-bottom:1.5rem;
-}
-.input-row { display:flex; gap:0.8rem; }
-.input-row input {
-  flex:1; padding:0.8rem 1rem; border:1.5px solid #e8ddd8;
-  border-radius:10px; font-family:'Jost',sans-serif; font-size:0.92rem; outline:none;
-}
-.input-row input:focus { border-color:var(--rose); }
-
-/* GUEST LIST */
-.guest-table-box {
-  background:#fff; border-radius:16px; padding:1.5rem;
-  box-shadow:0 4px 20px rgba(232,41,74,0.09);
-}
-.stats-row { display:flex; gap:1rem; margin-bottom:1.2rem; flex-wrap:wrap; }
-.stat { flex:1; min-width:100px; text-align:center; padding:1rem; border-radius:10px; }
-.stat.total { background:var(--rose-light); }
-.stat.checked { background:var(--green-light); }
-.stat.pending { background:#fff8e1; }
-.stat-n { font-size:2rem; font-weight:700; font-family:'Playfair Display',serif; }
-.stat.total .stat-n { color:var(--rose); }
-.stat.checked .stat-n { color:var(--green); }
-.stat.pending .stat-n { color:#f39c12; }
-.stat-l { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-top:0.2rem; }
-
-.search-input {
-  width:100%; padding:0.7rem 1rem; border:1.5px solid #e8ddd8;
-  border-radius:10px; font-family:'Jost',sans-serif; font-size:0.92rem;
-  outline:none; margin-bottom:1rem;
-}
-.search-input:focus { border-color:var(--rose); }
-
-.guest-table { width:100%; border-collapse:collapse; font-size:0.88rem; }
-.guest-table th { text-align:left; padding:0.6rem 0.8rem; background:var(--rose-light); color:var(--rose); font-weight:600; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; }
-.guest-table td { padding:0.7rem 0.8rem; border-bottom:1px solid #f5f0f0; }
-.guest-table tr:last-child td { border-bottom:none; }
-.badge {
-  display:inline-block; padding:0.2rem 0.6rem; border-radius:20px;
-  font-size:0.72rem; font-weight:600;
-}
-.badge.hadir { background:var(--green-light); color:var(--green); }
-.badge.tidak { background:#fff0f0; color:#e74c3c; }
-.badge.checkedin { background:var(--green); color:#fff; }
-.badge.waiting { background:#fff8e1; color:#f39c12; }
-
-.btn-checkin-manual {
-  padding:0.35rem 0.7rem; background:var(--rose); color:#fff;
-  border:none; border-radius:6px; font-size:0.75rem; font-weight:600;
-  cursor:pointer; font-family:'Jost',sans-serif;
-}
-.btn-undo {
-  padding:0.35rem 0.7rem; background:#f5f0f0; color:var(--muted);
-  border:none; border-radius:6px; font-size:0.75rem; cursor:pointer;
-  font-family:'Jost',sans-serif;
-}
-
-.empty-state { text-align:center; padding:2.5rem; color:var(--muted); }
-.empty-state div { font-size:2.5rem; margin-bottom:0.5rem; }
+/* PASSWORD MODAL */
+#pw-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:1.5rem;}
+.pw-card{background:var(--card);border:1px solid var(--gold-border);border-radius:20px;padding:2rem 1.5rem;width:100%;max-width:300px;text-align:center;}
+.pw-icon{font-size:2rem;margin-bottom:.7rem;}
+.pw-card h2{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:400;font-style:italic;color:var(--gold);margin-bottom:.35rem;}
+.pw-card p{font-size:.78rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.5;}
+.pw-dots{display:flex;justify-content:center;gap:.55rem;margin-bottom:1.2rem;}
+.pw-dot{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--gold-border);background:transparent;transition:all .15s;}
+.pw-dot.filled{background:var(--gold);border-color:var(--gold);}
+.pw-dot.error{background:var(--red);border-color:var(--red);}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem;margin-bottom:.85rem;}
+.num-btn{padding:.85rem;background:var(--card2);border:1px solid var(--gold-border);border-radius:12px;color:var(--text);font-size:1.1rem;font-weight:500;font-family:'Jost',sans-serif;cursor:pointer;transition:all .15s;}
+.num-btn:active,.num-btn:hover{background:var(--gold-light);border-color:var(--gold);}
+.num-btn.del{font-size:.85rem;color:var(--muted);}
+.btn-pw-skip{width:100%;padding:.65rem;background:transparent;border:1px solid var(--gold-border);border-radius:10px;color:var(--muted);font-family:'Jost',sans-serif;font-size:.78rem;cursor:pointer;}
 
 /* TOAST */
-.toast {
-  position:fixed; bottom:1.5rem; right:1.5rem;
-  background:var(--dark); color:#fff; padding:0.9rem 1.4rem;
-  border-radius:12px; font-size:0.88rem;
-  box-shadow:0 8px 30px rgba(0,0,0,0.2);
-  transform:translateY(80px); opacity:0;
-  transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index:999;
-}
-.toast.show { transform:translateY(0); opacity:1; }
-
-@media(max-width:500px) {
-  .stats-row { flex-direction:column; }
-  .input-row { flex-direction:column; }
-}
+#toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card2);border:1px solid var(--gold-border);color:var(--text);padding:.65rem 1.2rem;border-radius:50px;font-size:.8rem;font-weight:500;z-index:300;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,.5);}
+#toast.show{transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
 
-<header>
-  <h1>🎫 Check-In Tamu</h1>
-  <p>Nathan &amp; Ana Wedding · 26 December 2026 · GSJS Pakuwon Mall</p>
-</header>
-
-<div class="container">
-
-  <!-- TABS -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('scanner')">📷 Scan QR</button>
-    <button class="tab" onclick="switchTab('manual')">⌨️ Manual</button>
-    <button class="tab" onclick="switchTab('list')">📋 Daftar Tamu</button>
-  </div>
-
-  <!-- ── SCANNER TAB ── -->
-  <div id="tab-scanner">
-    <div class="scanner-box">
-      <h2>📷 Scan QR Tiket Tamu</h2>
-      <div id="video-container" style="display:none;width:100%;position:relative;border-radius:12px;overflow:hidden;background:#000;">
-        <video id="scanner-video" playsinline autoplay muted
-          style="width:100%;height:300px;object-fit:cover;display:block;"></video>
-        <div class="scan-overlay">
-          <div class="scan-line"></div>
-        </div>
-      </div>
-      <canvas id="scanner-canvas" style="display:none;"></canvas>
-
-      <div id="scanner-controls" style="text-align:center;padding:1rem 0;">
-        <button class="btn" onclick="startCamera()" id="btn-start-cam">📷 Aktifkan Kamera</button>
-      </div>
-
-      <div id="scan-status" style="text-align:center;color:var(--muted);font-size:0.85rem;margin-top:0.5rem;"></div>
+<!-- PASSWORD MODAL -->
+<div id="pw-modal">
+  <div class="pw-card">
+    <div class="pw-icon">🔐</div>
+    <h2>Panitia Check-In</h2>
+    <p>Masukkan PIN untuk akses kamera scan.<br/>Atau lewati untuk lihat data saja.</p>
+    <div class="pw-dots" id="pw-dots">
+      <div class="pw-dot" id="d0"></div><div class="pw-dot" id="d1"></div>
+      <div class="pw-dot" id="d2"></div><div class="pw-dot" id="d3"></div>
+      <div class="pw-dot" id="d4"></div><div class="pw-dot" id="d5"></div>
     </div>
+    <div class="numpad">
+      <button class="num-btn" onclick="numPress('1')">1</button>
+      <button class="num-btn" onclick="numPress('2')">2</button>
+      <button class="num-btn" onclick="numPress('3')">3</button>
+      <button class="num-btn" onclick="numPress('4')">4</button>
+      <button class="num-btn" onclick="numPress('5')">5</button>
+      <button class="num-btn" onclick="numPress('6')">6</button>
+      <button class="num-btn" onclick="numPress('7')">7</button>
+      <button class="num-btn" onclick="numPress('8')">8</button>
+      <button class="num-btn" onclick="numPress('9')">9</button>
+      <button class="num-btn del" onclick="numDel()">⌫</button>
+      <button class="num-btn" onclick="numPress('0')">0</button>
+      <button class="num-btn del" onclick="numClear()">✕</button>
+    </div>
+    <button class="btn-pw-skip" onclick="skipPassword()">Lewati → lihat data saja</button>
+  </div>
+</div>
 
-    <!-- Result -->
-    <div id="scan-result" class="result-card">
+<!-- HEADER -->
+<div id="app-header">
+  <div class="header-top">
+    <h1>Nathan &amp; Ana · Check-In</h1>
+    <div id="conn-dot"></div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" id="tab-btn-scanner" onclick="switchSection('scanner')">
+      📷 Scan <span class="lock-icon" id="lock-icon">🔒</span>
+    </button>
+    <button class="nav-tab" id="tab-btn-list" onclick="switchSection('list')">
+      📋 Tamu
+    </button>
+    <button class="nav-tab" id="tab-btn-status" onclick="switchSection('status')">
+      📊 Status
+    </button>
+    <button class="nav-tab" id="tab-btn-table" onclick="switchSection('table')">
+      🪑 Meja
+    </button>
+  </div>
+</div>
+
+<div id="main-content">
+
+  <!-- SCANNER SECTION -->
+  <div class="section active" id="sec-scanner">
+    <div id="scan-result">
       <div class="result-icon" id="res-icon"></div>
       <div class="result-status" id="res-status"></div>
       <div class="result-info" id="res-info"></div>
-      <div style="display:flex;gap:0.8rem;margin-top:1rem;justify-content:center;flex-wrap:wrap;">
-        <button class="btn btn-green" id="btn-confirm-checkin" onclick="confirmCheckin()" style="display:none;">
-          ✅ Konfirmasi Check-In
-        </button>
-        <button class="btn btn-outline" onclick="resetScan()">🔄 Scan Lagi</button>
+      <div class="result-actions">
+        <button class="btn-confirm" id="res-confirm" style="display:none" onclick="confirmCheckin()">✅ Konfirmasi Check-In</button>
+        <button class="btn-cancel" onclick="closeScanResult()">Tutup</button>
       </div>
     </div>
-  </div>
-
-  <!-- ── MANUAL TAB ── -->
-  <div id="tab-manual" style="display:none;">
-    <div class="manual-box">
-      <h2>⌨️ Check-In Manual</h2>
-      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;">Masukkan Ticket ID atau nama tamu untuk check-in manual.</p>
+    <div class="scanner-wrap">
+      <div class="scanner-header">
+        <h2>🎫 Scan QR Tiket</h2>
+        <span style="font-size:.7rem;color:var(--muted);" id="cam-badge">Kamera mati</span>
+      </div>
+      <div style="position:relative;">
+        <video id="scanner-video" playsinline autoplay muted></video>
+        <canvas id="scanner-canvas" style="display:none;"></canvas>
+        <div class="scan-overlay">
+          <div class="scan-frame"><span></span></div>
+          <div class="scan-line-anim"></div>
+        </div>
+      </div>
+      <div id="scan-status">Kamera belum aktif</div>
+      <div class="scanner-controls">
+        <button class="btn-cam btn-start" id="btn-start" onclick="startCamera()">▶ Mulai Kamera</button>
+        <button class="btn-cam btn-stop" id="btn-stop" onclick="stopCamera()" style="display:none">⏹ Stop</button>
+      </div>
+    </div>
+    <div class="manual-card">
+      <h3>⌨️ Input Manual</h3>
       <div class="input-row">
-        <input type="text" id="manual-input" placeholder="Ticket ID (contoh: NA-BUDI-ABC123) atau nama tamu"
+        <input class="manual-input" id="manual-input" type="text"
+          placeholder="Ticket ID atau nama tamu"
           onkeydown="if(event.key==='Enter') manualCheckin()"/>
-        <button class="btn" onclick="manualCheckin()">✅ Check-In</button>
+        <button class="btn-manual" onclick="manualCheckin()">Check-In</button>
       </div>
-    </div>
-
-    <div id="manual-result" class="result-card">
-      <div class="result-icon" id="manual-res-icon"></div>
-      <div class="result-status" id="manual-res-status"></div>
-      <div class="result-info" id="manual-res-info"></div>
+      <div id="manual-result"></div>
     </div>
   </div>
 
-  <!-- ── GUEST LIST TAB ── -->
-  <div id="tab-list" style="display:none;">
-    <div class="guest-table-box">
-      <div class="stats-row">
-        <div class="stat total">
-          <div class="stat-n" id="stat-total">0</div>
-          <div class="stat-l">Total Tamu</div>
-        </div>
-        <div class="stat checked">
-          <div class="stat-n" id="stat-checked">0</div>
-          <div class="stat-l">Sudah Hadir</div>
-        </div>
-        <div class="stat pending">
-          <div class="stat-n" id="stat-pending">0</div>
-          <div class="stat-l">Belum Hadir</div>
-        </div>
+  <!-- GUEST LIST SECTION -->
+  <div class="section" id="sec-list">
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-total">—</div>
+        <div class="stat-label">Total</div>
       </div>
-
-      <input type="text" class="search-input" id="list-search" placeholder="🔍 Cari nama tamu..." oninput="renderList()"/>
-
-      <div style="display:flex;gap:0.8rem;margin-bottom:1rem;flex-wrap:wrap;">
-        <button class="btn" onclick="exportCSV()" style="font-size:0.85rem;padding:0.6rem 1rem;">📊 Export CSV</button>
-        <button class="btn btn-outline" onclick="if(confirm('Reset semua data check-in?')) { clearCheckins(); }" style="font-size:0.85rem;padding:0.6rem 1rem;">🗑️ Reset Data</button>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-checkedin" style="color:var(--green)">—</div>
+        <div class="stat-label">Hadir</div>
       </div>
-
-      <div id="guest-list-container">
-        <div class="empty-state"><div>👥</div><p>Belum ada data tamu.<br>Tamu yang sudah RSVP akan muncul di sini.</p></div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-pending" style="color:var(--amber)">—</div>
+        <div class="stat-label">Belum</div>
       </div>
+    </div>
+    <div class="filter-row">
+      <button class="pill active" onclick="setFilter('all',this)">Semua</button>
+      <button class="pill" onclick="setFilter('checked',this)">✅ Sudah Hadir</button>
+      <button class="pill" onclick="setFilter('notchecked',this)">⏳ Belum Hadir</button>
+      <button class="pill" onclick="setFilter('hadir',this)">Konfirmasi Hadir</button>
+      <button class="pill" onclick="setFilter('tidak',this)">Tidak Hadir</button>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="list-search" type="text"
+        placeholder="Cari nama tamu..." oninput="renderList()"/>
+    </div>
+    <div class="guest-count" id="guest-count">Memuat...</div>
+    <div id="guest-list-container">
+      <div style="text-align:center;padding:2.5rem;color:var(--muted);font-size:.82rem;">⏳ Memuat data tamu...</div>
+    </div>
+  </div>
+
+  <!-- STATUS SECTION -->
+  <div class="section" id="sec-status">
+    <div class="status-grid">
+      <div class="status-card">
+        <div class="num" id="s-total">—</div>
+        <div class="lbl">Total RSVP</div>
+      </div>
+      <div class="status-card">
+        <div class="num" id="s-checkedin" style="color:var(--green)">—</div>
+        <div class="lbl">Check-In</div>
+      </div>
+      <div class="status-card">
+        <div class="num" id="s-hadir">—</div>
+        <div class="lbl">Konfirmasi</div>
+      </div>
+      <div class="status-card">
+        <div class="num" id="s-pending" style="color:var(--amber)">—</div>
+        <div class="lbl">Belum Masuk</div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Progress Check-In</span>
+        <span id="s-pct" style="color:var(--gold);font-weight:600;">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="s-bar" style="width:0%"></div></div>
+    </div>
+    <div class="manual-card">
+      <div class="recent-title">🕐 Check-In Terakhir</div>
+      <div id="recent-checkins">
+        <div style="color:var(--muted);font-size:.8rem;text-align:center;padding:.8rem 0;">Belum ada check-in</div>
+      </div>
+    </div>
+    <button class="reset-btn" onclick="resetAll()" style="display:none">🔄 Reset Semua Check-In</button>
+  </div>
+
+  <!-- MEJA SECTION -->
+  <div class="section" id="sec-table">
+    <div class="meja-search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="meja-search" type="text"
+        placeholder="Cari nama tamu atau no. meja..." oninput="renderMeja()"/>
+    </div>
+    <div id="meja-container">
+      <div style="text-align:center;padding:2.5rem;color:var(--muted);font-size:.82rem;">⏳ Memuat data meja...</div>
     </div>
   </div>
 
 </div>
 
-<div class="toast" id="toast"></div>
+<div id="toast"></div>
 
 <script>
 // ── CONFIG ──
-// Semua file (index, admin, checkin) ada di folder public/ dan diakses via Express.
-// origin otomatis = URL server → tidak perlu hardcode apapun.
-const SERVER_URL = 'http://localhost:3000'; // ← ganti jika deploy ke VPS/cloud
+const STORAGE_KEY_SERVER = 'na_wedding_server_url';
 function getAPIBase() {
+  const saved = localStorage.getItem(STORAGE_KEY_SERVER);
+  if (saved && saved.startsWith('http')) return saved.replace(/\/+$/, '');
   const origin = window.location.origin;
-  if (!origin || origin === 'null' || window.location.protocol === 'file:') return SERVER_URL;
-  const staticHosts = ['netlify.app', 'github.io', 'vercel.app', 'pages.dev', 'surge.sh'];
-  if (staticHosts.some(h => origin.includes(h))) return SERVER_URL;
-  return origin; // ← semua file via Express: origin = server URL ✓
+  const staticHosts = ['netlify.app','github.io','vercel.app','pages.dev','surge.sh'];
+  if (origin && origin !== 'null' && window.location.protocol !== 'file:'
+    && !staticHosts.some(h => origin.includes(h))) return origin;
+  return 'http://localhost:3000';
 }
 const API_BASE = getAPIBase();
-console.log('📡 API_BASE:', API_BASE);
-let pendingScanData = null;
-let scanInterval = null;
-let videoStream = null;
-let cachedGuests = []; // local cache for speed
 
-// ── DATA (MongoDB API) ──
+// ── generateTicketId — HARUS SAMA PERSIS dengan index.html & admin-qr-tamu.html ──
+function generateTicketId(name) {
+  const slug = name.trim().replace(/\s+/g,'').substring(0,5).toUpperCase();
+  const hash = Math.abs(name.trim().split('').reduce((a,c) => (a<<5)-a+c.charCodeAt(0), 0))
+    .toString(36).toUpperCase().substring(0,6);
+  return 'NA-' + slug + '-' + hash;
+}
+
+// ── STATE ──
+const CORRECT_PIN = '082001';
+let pinBuffer = '';
+let isAuthorized = false;
+let currentFilter = 'all';
+let allGuests = [];
+let pendingCheckin = null;
+let scanActive = false;
+let stream = null;
+
+// ── PIN ──
+function numPress(n) {
+  if (pinBuffer.length >= 6) return;
+  pinBuffer += n;
+  updateDots();
+  if (pinBuffer.length === 6) setTimeout(checkPin, 150);
+}
+function numDel() { pinBuffer = pinBuffer.slice(0, -1); updateDots(); }
+function numClear() { pinBuffer = ''; updateDots(); }
+function updateDots(error) {
+  for (let i = 0; i < 6; i++) {
+    const d = document.getElementById('d' + i);
+    d.className = 'pw-dot';
+    if (error) d.classList.add('error');
+    else if (i < pinBuffer.length) d.classList.add('filled');
+  }
+}
+function checkPin() {
+  if (pinBuffer === CORRECT_PIN) {
+    isAuthorized = true;
+    document.getElementById('lock-icon').textContent = '🔓';
+    document.getElementById('pw-modal').style.display = 'none';
+    showToast('✅ Akses panitia diberikan');
+    renderList(); checkConnection();
+  } else {
+    updateDots(true);
+    setTimeout(() => { pinBuffer = ''; updateDots(); }, 900);
+  }
+}
+function skipPassword() {
+  document.getElementById('pw-modal').style.display = 'none';
+  switchSection('list');
+  renderList(); checkConnection();
+}
+
+// ── CONNECTION ──
+async function checkConnection() {
+  const dot = document.getElementById('conn-dot');
+  try {
+    const res = await fetch(API_BASE + '/api/health', { signal: AbortSignal.timeout(4000) });
+    dot.className = res.ok ? 'online' : 'offline';
+  } catch { dot.className = 'offline'; }
+}
+setInterval(checkConnection, 15000);
+
+// ── SECTION SWITCH ──
+function switchSection(name) {
+  if (name === 'scanner' && !isAuthorized) {
+    document.getElementById('pw-modal').style.display = 'flex';
+    pinBuffer = ''; updateDots();
+    return;
+  }
+  ['scanner','list','status','table'].forEach(s => {
+    document.getElementById('sec-' + s).classList.toggle('active', s === name);
+    document.getElementById('tab-btn-' + s).classList.toggle('active', s === name);
+  });
+  if (name === 'list') renderList();
+  if (name === 'status') renderStatus();
+  if (name === 'table') renderMeja();
+  if (name !== 'scanner') stopCamera();
+}
+
+// ── API ──
 async function getGuests() {
   try {
     const res = await fetch(API_BASE + '/api/rsvp');
-    if (!res.ok) throw new Error('Failed to fetch guests: ' + res.status);
-    cachedGuests = await res.json();
-    return cachedGuests;
-  } catch(e) {
-    console.error('Error fetching guests:', e);
-    console.warn('Using cached guests');
-    return cachedGuests;
-  }
+    if (!res.ok) throw new Error();
+    allGuests = await res.json();
+    return allGuests;
+  } catch { showToast('⚠️ Gagal memuat data'); return allGuests; }
 }
-
 async function checkinGuest(ticketId) {
-  const res = await fetch(API_BASE + '/api/rsvp/checkin/' + ticketId, { method: 'PATCH' });
-  if (!res.ok) throw new Error('Check-in failed: ' + res.status);
-  return res.json();
+  const res = await fetch(API_BASE + '/api/rsvp/checkin/' + encodeURIComponent(ticketId), { method:'PATCH' });
+  return await res.json();
 }
-
 async function undoCheckinGuest(ticketId) {
-  const res = await fetch(API_BASE + '/api/rsvp/undo/' + ticketId, { method: 'PATCH' });
-  if (!res.ok) throw new Error('Undo failed: ' + res.status);
-  return res.json();
+  const res = await fetch(API_BASE + '/api/rsvp/undo/' + encodeURIComponent(ticketId), { method:'PATCH' });
+  return await res.json();
 }
 
-async function checkinByName(nama) {
-  const res = await fetch(API_BASE + '/api/rsvp/checkin-name', {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nama })
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── FILTER ──
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderList();
+}
+
+// ── RENDER LIST ──
+async function renderList() {
+  const guests = await getGuests();
+  const q = (document.getElementById('list-search')?.value || '').toLowerCase();
+  const filtered = guests.filter(g => {
+    if (q && !g.nama?.toLowerCase().includes(q)) return false;
+    if (currentFilter === 'checked') return g.checkedIn;
+    if (currentFilter === 'notchecked') return !g.checkedIn;
+    if (currentFilter === 'hadir') return g.hadir === 'Hadir';
+    if (currentFilter === 'tidak') return g.hadir === 'Tidak Hadir';
+    return true;
   });
-  if (!res.ok) throw new Error('Check-in failed: ' + res.status);
-  return res.json();
+  const total = guests.length;
+  const cin = guests.filter(g => g.checkedIn).length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-checkedin').textContent = cin;
+  document.getElementById('stat-pending').textContent = total - cin;
+  document.getElementById('guest-count').textContent = filtered.length + ' tamu ditampilkan';
+  const container = document.getElementById('guest-list-container');
+  if (!filtered.length) {
+    container.innerHTML = '<div style="text-align:center;padding:2.5rem;color:var(--muted);font-size:.82rem;">Tidak ada tamu ditemukan</div>';
+    return;
+  }
+  container.innerHTML = filtered.map(g => {
+    const ini = (g.nama||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const cinBadge = g.checkedIn ? '<span class="badge cin">✓ Hadir</span>' : '<span class="badge cout">Belum</span>';
+    const hadBadge = g.hadir==='Hadir' ? '<span class="badge hadir">Hadir</span>'
+      : g.hadir==='Tidak Hadir' ? '<span class="badge tidak">Tidak</span>'
+      : '<span class="badge pending">Pending</span>';
+    const undo = g.checkedIn && isAuthorized
+      ? `<button class="btn-undo" onclick="undoCI('${g.ticketId}')">↩</button>` : '';
+    return `<div class="guest-item ${g.checkedIn?'checked':''}">
+      <div class="guest-avatar">${ini}</div>
+      <div class="guest-info">
+        <div class="guest-name">${g.nama||'-'}</div>
+        <div class="guest-meta">${cinBadge}${hadBadge}<span class="ticket-id">${g.ticketId||''}</span></div>
+      </div>
+      <div class="guest-right">
+        <div class="pax-badge">${g.jumlah||1}</div>${undo}
+      </div>
+    </div>`;
+  }).join('');
 }
 
-async function resetAllCheckins() {
-  const res = await fetch(API_BASE + '/api/rsvp/checkins', { method: 'DELETE' });
-  if (!res.ok) throw new Error('Reset failed: ' + res.status);
-  return res.json();
+// ── RENDER STATUS ──
+async function renderStatus() {
+  const guests = await getGuests();
+  const total = guests.length;
+  const cin = guests.filter(g => g.checkedIn).length;
+  const hadir = guests.filter(g => g.hadir==='Hadir').length;
+  const pct = total > 0 ? Math.round(cin/total*100) : 0;
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('s-checkedin').textContent = cin;
+  document.getElementById('s-hadir').textContent = hadir;
+  document.getElementById('s-pending').textContent = total - cin;
+  document.getElementById('s-pct').textContent = pct + '%';
+  document.getElementById('s-bar').style.width = pct + '%';
+  const recent = guests.filter(g=>g.checkedIn&&g.checkedInAt)
+    .sort((a,b)=>new Date(b.checkedInAt)-new Date(a.checkedInAt)).slice(0,8);
+  const el = document.getElementById('recent-checkins');
+  if (!recent.length) { el.innerHTML='<div style="color:var(--muted);font-size:.8rem;text-align:center;padding:.8rem 0;">Belum ada check-in</div>'; return; }
+  el.innerHTML = recent.map(g => {
+    const ini = (g.nama||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const t = new Date(g.checkedInAt).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="recent-item"><div class="recent-avatar">${ini}</div><div class="recent-name">${g.nama||'-'}</div><div class="recent-time">${t}</div></div>`;
+  }).join('');
 }
 
-// ── TABS ──
-function switchTab(tab) {
-  ['scanner','manual','list'].forEach(t => {
-    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
-    document.querySelectorAll('.tab')[['scanner','manual','list'].indexOf(t)].classList.toggle('active', t === tab);
-  });
-  if (tab === 'list') renderList();
-  if (tab !== 'scanner') stopCamera();
+// ── UNDO & RESET ──
+async function undoCI(ticketId) {
+  if (!isAuthorized) { showToast('🔒 Perlu login panitia'); return; }
+  try { await undoCheckinGuest(ticketId); showToast('↩ Check-in dibatalkan'); renderList(); }
+  catch { showToast('⚠️ Gagal undo'); }
 }
-
-// ── CAMERA using QR Scanner ──
-
-async function startCamera() {
-  const btn = document.getElementById('btn-start-cam');
-  btn.textContent = '⏳ Memuat...';
-  btn.disabled = true;
-
+async function resetAll() {
+  if (!isAuthorized) { showToast('🔒 Perlu login panitia'); return; }
+  if (!confirm('Reset semua check-in?')) return;
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' } }
-    });
+    await fetch(API_BASE + '/api/rsvp/checkins', { method:'DELETE' });
+    showToast('🔄 Semua check-in direset'); renderStatus(); renderList();
+  } catch { showToast('⚠️ Gagal reset'); }
+}
 
-    videoStream = stream;
+// ── CAMERA ──
+async function startCamera() {
+  if (!isAuthorized) return;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'environment' } });
     const video = document.getElementById('scanner-video');
     video.srcObject = stream;
-    video.setAttribute('playsinline', '');
-    video.muted = true;
-
-    // Show container
-    document.getElementById('video-container').style.display = 'block';
-    btn.textContent = '⏹ Stop Kamera';
-    btn.disabled = false;
-    btn.onclick = stopCamera;
-    document.getElementById('scan-status').textContent = '🔍 Arahkan kamera ke QR tiket tamu...';
-
-    video.onloadedmetadata = () => {
-      video.play();
-      scanInterval = setInterval(() => scanFrame(video), 250);
-    };
-
+    await video.play();
+    document.getElementById('btn-start').style.display = 'none';
+    document.getElementById('btn-stop').style.display = 'block';
+    document.getElementById('cam-badge').textContent = '🟢 Aktif';
+    document.getElementById('scan-status').textContent = '🔍 Arahkan ke QR tiket tamu...';
+    scanActive = true;
+    requestAnimationFrame(scanFrame);
   } catch(e) {
-    btn.textContent = '📷 Aktifkan Kamera';
-    btn.disabled = false;
-    btn.onclick = startCamera;
-    document.getElementById('scan-status').textContent = '⚠️ Tidak bisa akses kamera: ' + (e.message || e);
+    document.getElementById('scan-status').textContent = '⚠️ Tidak bisa akses kamera: ' + e.message;
   }
 }
-
 function stopCamera() {
-  if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
-  if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
+  scanActive = false;
+  if (stream) { stream.getTracks().forEach(t=>t.stop()); stream=null; }
   const video = document.getElementById('scanner-video');
-  if (video) { video.srcObject = null; }
-  document.getElementById('video-container').style.display = 'none';
-  const btn = document.getElementById('btn-start-cam');
-  btn.textContent = '📷 Aktifkan Kamera';
-  btn.disabled = false;
-  btn.onclick = startCamera;
-  document.getElementById('scan-status').textContent = '';
+  video.srcObject = null;
+  document.getElementById('btn-start').style.display = 'block';
+  document.getElementById('btn-stop').style.display = 'none';
+  document.getElementById('cam-badge').textContent = 'Kamera mati';
+  document.getElementById('scan-status').textContent = 'Kamera belum aktif';
 }
-
-function scanFrame(video) {
-  if (!video || video.readyState < 2 || video.paused) return;
-  if (!video.videoWidth || !video.videoHeight) return;
-
+function scanFrame() {
+  if (!scanActive) return;
+  const video = document.getElementById('scanner-video');
   const canvas = document.getElementById('scanner-canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const code = jsQR(imageData.data, imageData.width, imageData.height, {
-    inversionAttempts: 'attemptBoth'
-  });
-
-  if (code && code.data) {
-    stopCamera();
-    processQR(code.data);
+  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    if (typeof jsQR === 'undefined') {
+      document.getElementById('scan-status').textContent = '⚠️ jsQR belum siap, tunggu...';
+      setTimeout(() => { if (scanActive) requestAnimationFrame(scanFrame); }, 300);
+      return;
+    }
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    // Coba dua mode: normal + invert — QR dari index.html pakai background gelap
+    const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'attemptBoth' });
+    if (code && code.data) { processQR(code.data); return; }
   }
+  requestAnimationFrame(scanFrame);
 }
 
 // ── PROCESS QR ──
 async function processQR(rawData) {
-  stopCamera();
+  scanActive = false;
   document.getElementById('scan-status').textContent = '⏳ Memverifikasi...';
+  console.log('📷 QR raw data:', rawData);
 
-  let data;
-  try { data = JSON.parse(rawData); }
-  catch(e) {
-    showScanResult('invalid', '❌', 'QR Tidak Valid', [
-      { label: 'Info', value: 'Format QR tidak dikenali. Pastikan QR dari undangan Nathan & Ana.' }
-    ], false);
-    return;
-  }
-
-  if (!data.id && !data.nama) {
-    showScanResult('invalid', '❌', 'QR Tidak Valid', [
-      { label: 'Info', value: 'QR tidak memiliki data yang valid.' }
-    ], false);
-    return;
-  }
-
-  const ticketId = data.id;
-  const nama = data.nama || '-';
-
+  // Parse QR data — both admin & guest QRs encode JSON {id, nama, ...}
+  let lookup = rawData.trim();
+  let parsedData = null;
   try {
-    // Coba cari langsung by ticketId (lebih cepat)
-    const singleRes = await fetch(API_BASE + '/api/rsvp/' + encodeURIComponent(ticketId));
+    parsedData = JSON.parse(rawData);
+    // Prioritas: id (ticketId) > ticketId field > nama > name
+    lookup = parsedData.id || parsedData.ticketId || parsedData.nama || parsedData.name || rawData.trim();
+    console.log('📋 Parsed QR - lookup:', lookup, '| data:', parsedData);
+  } catch {
+    // Not JSON — coba URL format (?tamu=Nama)
+    try {
+      const url = new URL(rawData.trim());
+      const t = url.searchParams.get('tamu');
+      if (t) {
+        lookup = decodeURIComponent(t);
+        console.log('🔗 URL QR - tamu:', lookup);
+      }
+    } catch {
+      console.log('⚠️ QR bukan JSON & bukan URL, pakai raw:', lookup);
+    }
+  }
 
-    if (singleRes.ok) {
-      const guest = await singleRes.json();
-      if (guest.checkedIn) {
-        const checkinTime = guest.checkedInAt ? new Date(guest.checkedInAt).toLocaleTimeString('id-ID') : '-';
-        showScanResult('already', '⚠️', 'Sudah Check-In Sebelumnya', [
-          { label: 'Nama', value: guest.nama },
-          { label: 'Kehadiran', value: guest.hadir || 'Hadir' },
-          { label: 'Check-in pukul', value: checkinTime },
-          { label: 'Ticket ID', value: guest.ticketId }
-        ], false);
+  // Jika lookup terlihat seperti nama (bukan ticketId format NA-xxx),
+  // generate ticketId dari nama dan coba dua lookup sekaligus
+  let lookupTicketId = lookup;
+  if (!/^NA-/i.test(lookup) && parsedData && (parsedData.nama || parsedData.name)) {
+    // Ini nama, bukan ticketId — generate ticketId deterministik seperti di index.html & admin
+    const namaForTicket = parsedData.nama || parsedData.name;
+    lookupTicketId = generateTicketId(namaForTicket);
+    console.log('🎫 Generated ticketId from nama:', namaForTicket, '->', lookupTicketId);
+  }
+
+  // Single fetch — server handles ticketId + nama fallback lookups
+  try {
+    const res = await fetch(API_BASE + '/api/rsvp/' + encodeURIComponent(lookupTicketId));
+    if (res.ok) {
+      const g = await res.json();
+      if (g.checkedIn) {
+        const t = g.checkedInAt ? new Date(g.checkedInAt).toLocaleTimeString('id-ID') : '-';
+        showResult('already','⚠️','Sudah Check-In',[['Nama',g.nama],['Ticket',g.ticketId],['Check-in jam',t]],false);
       } else {
-        pendingScanData = { ...data, _dbGuest: guest };
-        showScanResult('valid', '✅', 'Tamu Terverifikasi!', [
-          { label: 'Nama', value: guest.nama },
-          { label: 'Kehadiran', value: guest.hadir || 'Hadir' },
-          { label: 'Jumlah', value: (guest.jumlah || 1) + ' orang' },
-          { label: 'Ticket ID', value: guest.ticketId }
-        ], true);
+        pendingCheckin = g;
+        showResult('ok','✅','QR Valid — Konfirmasi?',[['Nama',g.nama],['Ticket',g.ticketId],['Kehadiran',g.hadir],['Tamu',g.jumlah+' orang']],true);
       }
-    } else if (singleRes.status === 404) {
-      // Tidak ada di DB — QR dari admin (belum RSVP), auto-register on confirm
-      pendingScanData = data;
-      showScanResult('valid', '✅', 'Tamu Ditemukan (QR Admin)', [
-        { label: 'Nama', value: nama },
-        { label: 'Kehadiran', value: data.hadir || 'Hadir' },
-        { label: 'Ticket ID', value: ticketId },
-        { label: 'Catatan', value: 'Tamu belum RSVP online — akan otomatis terdaftar.' }
-      ], true);
     } else {
-      throw new Error('Server error: ' + singleRes.status);
+      showResult('err','❌','QR Tidak Dikenali',[['Data',lookup.substring(0,40)]],false);
     }
   } catch(e) {
-    // Offline fallback
-    pendingScanData = data;
-    showScanResult('valid', '✅', 'QR Valid (Mode Offline)', [
-      { label: 'Nama', value: nama },
-      { label: 'Ticket ID', value: ticketId },
-      { label: 'Catatan', value: 'Server tidak terjangkau — check-in akan dicoba.' }
-    ], true);
+    showResult('err','❌','Server error',[['Info','Cek koneksi ke server']],false);
   }
 }
-
-function showScanResult(type, icon, status, info, showConfirm) {
-  const card = document.getElementById('scan-result');
-  card.className = 'result-card ' + type;
-  card.style.display = 'block';
+function showResult(type, icon, status, info, showConfirm) {
+  const colors = {ok:'var(--green)',already:'var(--amber)',err:'var(--red)'};
   document.getElementById('res-icon').textContent = icon;
-  document.getElementById('res-status').textContent = status;
-  const infoEl = document.getElementById('res-info');
-  infoEl.innerHTML = info.map(i => `<div class="result-row"><strong>${i.label}</strong><span>${i.value}</span></div>`).join('');
-  document.getElementById('btn-confirm-checkin').style.display = showConfirm ? 'inline-block' : 'none';
-  document.getElementById('scan-status').textContent = '';
+  const rs = document.getElementById('res-status');
+  rs.textContent = status; rs.style.color = colors[type]||'var(--text)';
+  document.getElementById('res-info').innerHTML = info.map(([k,v])=>
+    `<div class="result-row"><span>${k}</span><span>${v}</span></div>`).join('');
+  document.getElementById('res-confirm').style.display = showConfirm ? 'block' : 'none';
+  document.getElementById('scan-result').style.display = 'block';
+  stopCamera();
 }
-
+function closeScanResult() {
+  document.getElementById('scan-result').style.display = 'none';
+  pendingCheckin = null;
+  if (stream) { scanActive = true; requestAnimationFrame(scanFrame); document.getElementById('scan-status').textContent = '🔍 Arahkan ke QR tiket tamu...'; }
+}
 async function confirmCheckin() {
-  if (!pendingScanData) return;
-  const btn = document.getElementById('btn-confirm-checkin');
-  btn.disabled = true;
-  btn.textContent = '⏳ Memproses...';
-
-  const ticketId = pendingScanData.id;
-  const nama = pendingScanData.nama || (pendingScanData._dbGuest && pendingScanData._dbGuest.nama) || '-';
-
+  if (!pendingCheckin) return;
   try {
-    // First try direct check-in by ticketId
-    const result = await checkinGuest(ticketId);
-
-    if (result.ok) {
-      document.getElementById('res-icon').textContent = '🎉';
-      document.getElementById('res-status').textContent = nama + ' — Check-In Berhasil!';
-      btn.style.display = 'none';
-      showToast('✅ ' + nama + ' berhasil check-in!');
-      renderList();
-    } else if (result.error === 'Already checked in') {
-      document.getElementById('scan-result').className = 'result-card already';
-      document.getElementById('res-icon').textContent = '⚠️';
-      document.getElementById('res-status').textContent = 'Sudah Check-In Sebelumnya';
-      btn.style.display = 'none';
-    } else if (result.error === 'Guest not found') {
-      // Auto-register guest (from admin QR, hasn't RSVP'd yet)
-      try {
-        await fetch(API_BASE + '/api/rsvp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ticketId,
-            nama,
-            hadir: pendingScanData.hadir || 'Hadir',
-            jumlah: 1,
-            email: ''
-          })
-        });
-        // Now check in
-        const result2 = await checkinGuest(ticketId);
-        if (result2.ok) {
-          document.getElementById('res-icon').textContent = '🎉';
-          document.getElementById('res-status').textContent = nama + ' — Check-In Berhasil!';
-          btn.style.display = 'none';
-          showToast('✅ ' + nama + ' berhasil check-in!');
-          renderList();
-        } else {
-          throw new Error(result2.error);
-        }
-      } catch(e) {
-        showToast('⚠️ Gagal register & check-in tamu.');
-        btn.disabled = false;
-        btn.textContent = '✅ Konfirmasi Check-In';
-      }
-    } else {
-      showToast('⚠️ ' + (result.error || 'Terjadi kesalahan'));
-      btn.disabled = false;
-      btn.textContent = '✅ Konfirmasi Check-In';
-    }
-  } catch(e) {
-    showToast('⚠️ Tidak dapat terhubung ke server');
-    btn.disabled = false;
-    btn.textContent = '✅ Konfirmasi Check-In';
-  }
-  pendingScanData = null;
+    await checkinGuest(pendingCheckin.ticketId);
+    showToast('✅ ' + pendingCheckin.nama + ' berhasil check-in!');
+    document.getElementById('scan-result').style.display = 'none';
+    pendingCheckin = null;
+    renderList();
+    if (stream) { scanActive = true; requestAnimationFrame(scanFrame); document.getElementById('scan-status').textContent = '🔍 Arahkan ke QR tiket tamu...'; }
+  } catch { showToast('⚠️ Gagal check-in'); }
 }
 
-function resetScan() {
-  document.getElementById('scan-result').className = 'result-card';
-  pendingScanData = null;
-  startCamera();
-}
-
-// ── MANUAL CHECK-IN ──
+// ── MANUAL ──
 async function manualCheckin() {
   const val = document.getElementById('manual-input').value.trim();
-  if (!val) { showToast('⚠️ Masukkan Ticket ID atau nama tamu!'); return; }
-
-  const card = document.getElementById('manual-result');
-  const icon = document.getElementById('manual-res-icon');
-  const status = document.getElementById('manual-res-status');
-  const info = document.getElementById('manual-res-info');
-
-  card.className = 'result-card';
-  card.style.display = 'block';
-  icon.textContent = '⏳';
-  status.textContent = 'Mencari tamu...';
-  info.innerHTML = '';
-
+  const el = document.getElementById('manual-result');
+  if (!val) { showToast('⚠️ Masukkan nama atau Ticket ID'); return; }
+  el.style.display = 'block'; el.textContent = '⏳ Mencari...'; el.style.color = 'var(--muted)';
   try {
-    // Jika input terlihat seperti ticketId (format NA-XXXXX-XXXXXX)
-    const isTicketId = /^NA-/i.test(val);
-
-    if (isTicketId) {
-      // Coba check-in langsung by ticketId
-      try {
-        const result = await checkinGuest(val);
-        if (result.ok) {
-          const guest = result.guest;
-          card.className = 'result-card valid';
-          icon.textContent = '✅';
-          status.textContent = (guest.nama || val) + ' — Check-In Berhasil!';
-          info.innerHTML = `<div class="result-row"><strong>Nama</strong><span>${guest.nama || '-'}</span></div>
-            <div class="result-row"><strong>Ticket ID</strong><span>${val}</span></div>
-            <div class="result-row"><strong>Pukul</strong><span>${new Date().toLocaleTimeString('id-ID')}</span></div>`;
-          document.getElementById('manual-input').value = '';
-          showToast('✅ ' + (guest.nama || val) + ' berhasil check-in!');
-          renderList();
-          return;
-        } else if (result.error === 'Already checked in') {
-          const guest = result.guest;
-          card.className = 'result-card already';
-          icon.textContent = '⚠️';
-          status.textContent = 'Sudah Check-In Sebelumnya';
-          info.innerHTML = `<div class="result-row"><strong>Nama</strong><span>${guest.nama}</span></div>
-            <div class="result-row"><strong>Check-in</strong><span>${guest.checkedInAt ? new Date(guest.checkedInAt).toLocaleTimeString('id-ID') : '-'}</span></div>`;
-          return;
-        }
-      } catch(e) { /* fallthrough ke pencarian nama */ }
-    }
-
-    // Coba check-in by nama
-    const result = await checkinByName(val);
-
-    if (result.ok) {
-      const guest = result.guest;
-      card.className = 'result-card valid';
-      icon.textContent = '✅';
-      status.textContent = guest.nama + ' — Check-In Berhasil!';
-      info.innerHTML = `<div class="result-row"><strong>Nama</strong><span>${guest.nama}</span></div>
-        <div class="result-row"><strong>Ticket ID</strong><span>${guest.ticketId || '-'}</span></div>
-        <div class="result-row"><strong>Pukul</strong><span>${new Date().toLocaleTimeString('id-ID')}</span></div>`;
-      document.getElementById('manual-input').value = '';
-      showToast('✅ ' + guest.nama + ' berhasil check-in!');
-      renderList();
-    } else if (result.error === 'Already checked in') {
-      const guest = result.guest;
-      card.className = 'result-card already';
-      icon.textContent = '⚠️';
-      status.textContent = 'Sudah Check-In Sebelumnya';
-      info.innerHTML = `<div class="result-row"><strong>Nama</strong><span>${guest.nama}</span></div>
-        <div class="result-row"><strong>Check-in</strong><span>${guest.checkedInAt ? new Date(guest.checkedInAt).toLocaleTimeString('id-ID') : '-'}</span></div>`;
+    let res = await fetch(API_BASE + '/api/rsvp/' + encodeURIComponent(val));
+    if (res.ok) {
+      const g = await res.json();
+      if (g.checkedIn) { el.textContent = '⚠️ ' + g.nama + ' sudah check-in'; el.style.color='var(--amber)'; return; }
+      await checkinGuest(g.ticketId);
+      el.textContent = '✅ ' + g.nama + ' berhasil check-in!'; el.style.color='var(--green)';
     } else {
-      card.className = 'result-card invalid';
-      icon.textContent = '❌';
-      status.textContent = 'Tamu Tidak Ditemukan';
-      info.innerHTML = `<div class="result-row"><strong>Input</strong><span>${val}</span></div>
-        <div class="result-row"><strong>Info</strong><span>Tamu belum RSVP atau nama/Ticket ID tidak cocok.</span></div>`;
+      res = await fetch(API_BASE + '/api/rsvp/checkin-name', {
+        method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({nama:val})
+      });
+      if (res.status === 409) { const d=await res.json(); el.textContent='⚠️ '+(d.guest?.nama||val)+' sudah check-in'; el.style.color='var(--amber)'; return; }
+      if (!res.ok) { el.textContent='❌ Tamu tidak ditemukan'; el.style.color='var(--red)'; return; }
+      const d=await res.json(); el.textContent='✅ '+(d.guest?.nama||val)+' berhasil check-in!'; el.style.color='var(--green)';
     }
-  } catch(e) {
-    card.className = 'result-card invalid';
-    icon.textContent = '❌';
-    status.textContent = 'Koneksi gagal';
-    info.innerHTML = '<div class="result-row"><strong>Info</strong><span>Tidak dapat terhubung ke server.</span></div>';
-  }
+    showToast('✅ Check-in berhasil!');
+    document.getElementById('manual-input').value = '';
+    setTimeout(()=>{el.style.display='none';}, 3000);
+    renderList();
+  } catch(e) { el.textContent='⚠️ Error: '+e.message; el.style.color='var(--red)'; }
 }
 
-// ── GUEST LIST ──
-async function renderList() {
-  const guests = await getGuests();
-  const search = document.getElementById('list-search').value.toLowerCase();
-  const filtered = guests.filter(g => g.nama.toLowerCase().includes(search));
+// ── RENDER MEJA ──
+async function renderMeja() {
+  const container = document.getElementById('meja-container');
+  container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem;">⏳ Memuat...</div>';
 
-  const total = guests.length;
-  const checked = guests.filter(g => g.checkedIn).length;
-  document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-checked').textContent = checked;
-  document.getElementById('stat-pending').textContent = total - checked;
+  // Fetch both RSVP (checkin status) and guests (tableNo)
+  let rsvpList = [], guestList = [];
+  try {
+    const [rRes, gRes] = await Promise.all([
+      fetch(API_BASE + '/api/rsvp'),
+      fetch(API_BASE + '/api/guests')
+    ]);
+    if (rRes.ok) rsvpList = await rRes.json();
+    if (gRes.ok) guestList = await gRes.json();
+  } catch {}
 
-  const container = document.getElementById('guest-list-container');
-  if (!filtered.length) {
-    container.innerHTML = '<div class="empty-state"><div>' + (guests.length ? '🔍' : '👥') + '</div><p>' + (guests.length ? 'Tidak ada hasil.' : 'Belum ada tamu RSVP.') + '</p></div>';
+  // Merge tableNo into rsvp records by matching nama ↔ name
+  const merged = rsvpList.map(r => {
+    const guestRec = guestList.find(g =>
+      g.name?.toLowerCase() === r.nama?.toLowerCase()
+    );
+    return { ...r, tableNo: (guestRec?.tableNo || r.tableNo || r.meja || '').toString().trim() };
+  });
+
+  const q = (document.getElementById('meja-search')?.value || '').toLowerCase();
+
+  // Group by tableNo
+  const tableMap = {};
+  const noTable = [];
+  merged.forEach(g => {
+    if (!g.tableNo) { noTable.push(g); return; }
+    if (!tableMap[g.tableNo]) tableMap[g.tableNo] = [];
+    tableMap[g.tableNo].push(g);
+  });
+
+  const filterGuest = g => !q ||
+    (g.nama||'').toLowerCase().includes(q) ||
+    (g.tableNo||'').toLowerCase().includes(q);
+
+  const sortedTables = Object.keys(tableMap).sort((a,b) => {
+    const na = parseInt(a)||0, nb = parseInt(b)||0;
+    return na !== nb ? na - nb : a.localeCompare(b);
+  });
+
+  const filteredTables = sortedTables.filter(t =>
+    t.toLowerCase().includes(q) || tableMap[t].some(filterGuest)
+  );
+  const filteredNoTable = noTable.filter(filterGuest);
+
+  if (!filteredTables.length && !filteredNoTable.length) {
+    container.innerHTML = '<div class="meja-empty">Tidak ada tamu ditemukan</div>';
     return;
   }
 
-  container.innerHTML = `
-    <table class="guest-table">
-      <thead><tr>
-        <th>Nama</th>
-        <th>Status RSVP</th>
-        <th>Check-In</th>
-        <th>Aksi</th>
-      </tr></thead>
-      <tbody>
-        ${filtered.map(g => `
-          <tr>
-            <td>
-              <strong>${g.nama}</strong><br>
-              <span style="font-size:0.72rem;color:var(--muted);">${g.ticketId}</span>
-            </td>
-            <td><span class="badge ${g.hadir === 'Hadir' ? 'hadir' : 'tidak'}">${g.hadir || '-'}</span></td>
-            <td>
-              ${g.checkedIn
-                ? `<span class="badge checkedin">✅ Hadir</span><br><span style="font-size:0.7rem;color:var(--muted);">${new Date(g.checkedInAt).toLocaleTimeString('id-ID')}</span>`
-                : `<span class="badge waiting">⏳ Belum</span>`
-              }
-            </td>
-            <td>
-              ${g.checkedIn
-                ? `<button class="btn-undo" onclick="undoCheckin('${g.ticketId}')">↩ Undo</button>`
-                : `<button class="btn-checkin-manual" onclick="quickCheckin('${g.ticketId}')">✅ Check-In</button>`
-              }
-            </td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
-}
+  let html = '';
 
-async function quickCheckin(ticketId) {
-  try {
-    const result = await checkinGuest(ticketId);
-    const nama = result.guest?.nama || ticketId;
-    showToast('✅ ' + nama + ' berhasil check-in!');
-    renderList();
-  } catch(e) {
-    showToast('⚠️ Gagal check-in');
+  filteredTables.forEach(tableNo => {
+    const gList = tableMap[tableNo].filter(filterGuest);
+    if (!gList.length) return;
+    const cin = gList.filter(g => g.checkedIn).length;
+    html += `<div class="meja-table-card">
+      <div class="meja-table-header">
+        <span class="meja-table-title">🪑 Meja ${tableNo}</span>
+        <span class="meja-table-count">${cin}/${gList.length} hadir</span>
+      </div>`;
+    gList.forEach(g => {
+      const ini = (g.nama||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+      html += `<div class="meja-guest-row">
+        <div class="meja-avatar ${g.checkedIn?'cin':''}">${ini}</div>
+        <div class="meja-guest-name">${g.nama||'-'}</div>
+        <span class="meja-badge ${g.checkedIn?'cin':'out'}">${g.checkedIn?'✓ Hadir':'Belum'}</span>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  if (filteredNoTable.length) {
+    html += `<div class="meja-no-table">
+      <div class="meja-no-table-title">⚠️ Belum ada meja</div>`;
+    filteredNoTable.forEach(g => {
+      const ini = (g.nama||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+      html += `<div class="meja-guest-row">
+        <div class="meja-avatar ${g.checkedIn?'cin':''}">${ini}</div>
+        <div class="meja-guest-name">${g.nama||'-'}</div>
+        <span class="meja-badge ${g.checkedIn?'cin':'out'}">${g.checkedIn?'✓ Hadir':'Belum'}</span>
+      </div>`;
+    });
+    html += '</div>';
   }
+
+  container.innerHTML = html;
 }
 
-async function undoCheckin(ticketId) {
-  try {
-    await undoCheckinGuest(ticketId);
-    showToast('↩ Check-in dibatalkan');
-    renderList();
-  } catch(e) {
-    showToast('⚠️ Gagal membatalkan check-in');
-  }
-}
-
-async function clearCheckins() {
-  try {
-    await resetAllCheckins();
-    renderList();
-    showToast('🗑️ Semua check-in direset');
-  } catch(e) {
-    showToast('⚠️ Gagal reset check-in');
-  }
-}
-
-async function exportCSV() {
-  const guests = await getGuests();
-  if (!guests.length) { showToast('⚠️ Belum ada data!'); return; }
-  const rows = [['Nama','Ticket ID','RSVP','Check-In','Waktu Check-In']];
-  guests.forEach(g => rows.push([
-    g.nama, g.ticketId, g.hadir || '-',
-    g.checkedIn ? 'Ya' : 'Tidak',
-    g.checkedInAt ? new Date(g.checkedInAt).toLocaleString('id-ID') : '-'
-  ]));
-  const csv = rows.map(r => r.map(c => '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
-  const link = document.createElement('a');
-  link.download = 'checkin-nathan-ana.csv';
-  link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  link.click();
-  showToast('📊 CSV berhasil diexport!');
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
-}
-
-// Init
-renderList();
-
-// Auto-refresh every 30 seconds
-setInterval(renderList, 30000);
+// ── AUTO REFRESH ──
+setInterval(() => {
+  const active = document.querySelector('.section.active');
+  if (active?.id==='sec-list') renderList();
+  if (active?.id==='sec-status') renderStatus();
+  if (active?.id==='sec-table') renderMeja();
+}, 10000);
 </script>
 </body>
 </html>

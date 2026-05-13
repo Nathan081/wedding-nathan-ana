@@ -81,11 +81,11 @@ app.get('/api/guests', async (req, res) => {
 
 app.post('/api/guests', async (req, res) => {
   try {
-    const { name, phone } = req.body;
+    const { name, phone, tableNo } = req.body;
     if (!name) return res.status(400).json({ error: 'Name required' });
     const existing = await db.collection('guests').findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
     if (existing) return res.status(409).json({ error: 'Guest already exists', guest: existing });
-    const guest = { name, phone: phone || '', createdAt: new Date().toISOString() };
+    const guest = { name, phone: phone || '', tableNo: tableNo || '', createdAt: new Date().toISOString() };
     const result = await db.collection('guests').insertOne(guest);
     res.json({ ...guest, _id: result.insertedId });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -118,6 +118,17 @@ app.patch('/api/guests/:id/phone', async (req, res) => {
     await db.collection('guests').updateOne(
       { _id: new ObjectId(req.params.id) },
       { $set: { phone: phone || '' } }
+    );
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.patch('/api/guests/:id/table', async (req, res) => {
+  try {
+    const { tableNo } = req.body;
+    await db.collection('guests').updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: { tableNo: tableNo || '' } }
     );
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -215,15 +226,23 @@ app.patch('/api/rsvp/checkin-name', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// PATCH check-in by ticketId
+// PATCH check-in by ticketId (also searches by nama as fallback)
 app.patch('/api/rsvp/checkin/:ticketId', async (req, res) => {
   try {
-    const { ticketId } = req.params;
-    const guest = await db.collection('rsvp').findOne({ ticketId });
+    const query = req.params.ticketId;
+
+    // Try exact ticketId first, then nama fallback
+    let guest = await db.collection('rsvp').findOne({ ticketId: query });
+    if (!guest) {
+      guest = await db.collection('rsvp').findOne({
+        nama: { $regex: new RegExp(`^${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+      });
+    }
+
     if (!guest) return res.status(404).json({ error: 'Guest not found' });
     if (guest.checkedIn) return res.status(409).json({ error: 'Already checked in', guest });
     await db.collection('rsvp').updateOne(
-      { ticketId },
+      { _id: guest._id },
       { $set: { checkedIn: true, checkedInAt: new Date().toISOString() } }
     );
     res.json({ ok: true, guest: { ...guest, checkedIn: true } });
@@ -244,10 +263,28 @@ app.patch('/api/rsvp/undo/:ticketId', async (req, res) => {
 
 // ── PARAM routes — :ticketId selalu paling bawah ──
 
-// GET single RSVP by ticketId
+// GET single RSVP by ticketId — also falls back to nama search
 app.get('/api/rsvp/:ticketId', async (req, res) => {
   try {
-    const guest = await db.collection('rsvp').findOne({ ticketId: req.params.ticketId });
+    const query = req.params.ticketId;
+
+    // 1. Exact match by ticketId
+    let guest = await db.collection('rsvp').findOne({ ticketId: query });
+
+    // 2. Case-insensitive ticketId match
+    if (!guest) {
+      guest = await db.collection('rsvp').findOne({
+        ticketId: { $regex: new RegExp(`^${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+      });
+    }
+
+    // 3. Search by nama (for URL-encoded name QRs or name-only QRs)
+    if (!guest) {
+      guest = await db.collection('rsvp').findOne({
+        nama: { $regex: new RegExp(`^${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+      });
+    }
+
     if (!guest) return res.status(404).json({ error: 'Guest not found' });
     res.json(guest);
   } catch (e) { res.status(500).json({ error: e.message }); }

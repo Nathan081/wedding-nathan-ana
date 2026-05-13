@@ -344,6 +344,7 @@ header p { opacity:0.85; font-size:0.95rem; }
       <input type="text" id="guest-input" placeholder="Nama tamu (contoh: Budi Santoso)"
         onkeydown="if(event.key==='Enter') addGuest()"/>
       <input type="text" id="phone-input" placeholder="No. HP (contoh: 08123456789)" style="min-width:170px;"/>
+      <input type="text" id="table-input" placeholder="No. Meja (contoh: 3)" style="min-width:120px;max-width:140px;"/>
       <button class="btn" onclick="addGuest()">+ Tambah Tamu</button>
     </div>
   </div>
@@ -449,6 +450,7 @@ async function loadData() {
       _id: g._id,
       name: g.name,
       phone: g.phone || '',
+      tableNo: g.tableNo || '',
       source: 'admin',
       rsvp: null
     }));
@@ -542,22 +544,24 @@ async function ensureRSVP(name) {
 async function addGuest() {
   const input = document.getElementById('guest-input');
   const phoneInput = document.getElementById('phone-input');
+  const tableInput = document.getElementById('table-input');
   const name = input.value.trim();
   const phone = phoneInput ? phoneInput.value.trim() : '';
+  const tableNo = tableInput ? tableInput.value.trim() : '';
   if (!name) { showToast('⚠️ Masukkan nama tamu dulu!'); return; }
 
   try {
     const res = await fetch(API_BASE + '/api/guests', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, phone })
+      body: JSON.stringify({ name, phone, tableNo })
     });
     if (res.status === 409) { showToast('⚠️ Nama ini sudah ada!'); return; }
     if (!res.ok) { showToast('⚠️ Gagal tambah tamu.'); return; }
-    // Auto-create RSVP agar QR langsung valid di checkin
     await ensureRSVP(name);
     input.value = '';
     if (phoneInput) phoneInput.value = '';
+    if (tableInput) tableInput.value = '';
     showToast('✅ ' + name + ' berhasil ditambahkan!');
     loadData();
   } catch(e) { showToast('⚠️ Tidak dapat terhubung ke server.'); }
@@ -662,6 +666,21 @@ function renderGuests() {
           style="padding:0.3rem 0.5rem;background:var(--rose-light);color:var(--rose);border:none;border-radius:6px;font-size:0.7rem;cursor:pointer;font-weight:600;">💾</button>
       </div>`;
 
+    // Table number field (inline editable)
+    const tableNo = guest.tableNo || '';
+    const tableHtml = `
+      <div style="display:flex;align-items:center;gap:0.4rem;margin:0.2rem 0 0.5rem;">
+        <span style="font-size:0.75rem;color:var(--muted);">🪑</span>
+        <input type="text" id="table-${String(guest._id)}"
+          value="${escHtml(tableNo)}"
+          placeholder="No. Meja"
+          style="width:80px;padding:0.3rem 0.5rem;border:1px solid #e8ddd8;border-radius:6px;font-family:'Jost',sans-serif;font-size:0.75rem;outline:none;"
+          onfocus="this.style.borderColor='var(--rose)'" onblur="this.style.borderColor='#e8ddd8'"
+          onkeydown="if(event.key==='Enter') saveTableNo('${String(guest._id)}')"/>
+        <button onclick="saveTableNo('${String(guest._id)}')" title="Simpan no. meja"
+          style="padding:0.3rem 0.5rem;background:var(--rose-light);color:var(--rose);border:none;border-radius:6px;font-size:0.7rem;cursor:pointer;font-weight:600;">💾</button>
+      </div>`;
+
     const card = document.createElement('div');
     card.className = 'guest-card';
     card.innerHTML = `
@@ -670,6 +689,7 @@ function renderGuests() {
       <div style="margin:0.3rem 0;">${rsvpBadge}${sourceBadge}</div>
       ${ticketInfo}
       ${phoneHtml}
+      ${tableHtml}
       <div class="guest-link" title="Link undangan unik">🔗 ${escHtml(guestUrl)}</div>
       <div class="guest-qr" id="${qrId}"></div>
       <div class="card-actions">
@@ -724,10 +744,25 @@ async function savePhone(id) {
       body: JSON.stringify({ phone })
     });
     showToast('📱 No. HP tersimpan!');
-    // Update allGuests cache
     const g = allGuests.find(g => String(g._id) === id);
     if (g) g.phone = phone;
   } catch(e) { showToast('⚠️ Gagal simpan no. HP'); }
+}
+
+async function saveTableNo(id) {
+  const input = document.getElementById('table-' + id);
+  if (!input) return;
+  const tableNo = input.value.trim();
+  try {
+    await fetch(API_BASE + '/api/guests/' + id + '/table', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tableNo })
+    });
+    showToast('🪑 No. Meja tersimpan!');
+    const g = allGuests.find(g => String(g._id) === id);
+    if (g) g.tableNo = tableNo;
+  } catch(e) { showToast('⚠️ Gagal simpan no. meja'); }
 }
 
 function shareWA(name, url, waNum) {
