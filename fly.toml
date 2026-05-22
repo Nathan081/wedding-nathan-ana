@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for wedding-nathan-ana on 2026-04-22T15:23:31+07:00
+# fly.toml app configuration file generated for wedding-nathan-ana-temp1 on 2026-05-22T05:38:51Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'wedding-nathan-ana'
+app = 'wedding-nathan-ana-temp1'
 primary_region = 'sin'
 
 [build]
@@ -18,5 +18,6 @@ primary_region = 'sin'
 
 [[vm]]
   memory = '1gb'
+  cpu_kind = 'shared'
   cpus = 1
   memory_mb = 1024
