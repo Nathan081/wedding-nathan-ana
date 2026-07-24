@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>Check-In · Nathan &amp; Ana</title>
+<title>Check-In</title>
 <script src="/jsQR.min.js"></script>
+<script src="config.js"></script>
 <script>
 // If local jsQR failed, load from CDN
 window.addEventListener('load', function() {
@@ -217,7 +218,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Jo
 <!-- HEADER -->
 <div id="app-header">
   <div class="header-top">
-    <h1>Nathan &amp; Ana · Check-In</h1>
+    <h1 id="checkin-header-title">Nathan &amp; Ana · Check-In</h1>
     <div id="conn-dot"></div>
   </div>
   <div class="nav-tabs">
@@ -367,18 +368,23 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Jo
 <div id="toast"></div>
 
 <script>
-// ── CONFIG ──
+// ── CONFIG — dibaca dari config.js ──
+// API_BASE dan CONFIG sudah tersedia dari config.js
 const STORAGE_KEY_SERVER = 'na_wedding_server_url';
-function getAPIBase() {
+
+// Override API_BASE jika ada custom server di localStorage
+(function(){
   const saved = localStorage.getItem(STORAGE_KEY_SERVER);
-  if (saved && saved.startsWith('http')) return saved.replace(/\/+$/, '');
-  const origin = window.location.origin;
-  const staticHosts = ['netlify.app','github.io','vercel.app','pages.dev','surge.sh'];
-  if (origin && origin !== 'null' && window.location.protocol !== 'file:'
-    && !staticHosts.some(h => origin.includes(h))) return origin;
-  return 'http://localhost:3000';
+  if (saved && saved.startsWith('http')) {
+    // API_BASE sudah didefinisikan config.js; jika user set custom url, override
+    window._API_BASE_OVERRIDE = saved.replace(/\/+$/, '');
+  }
+})();
+
+function getAPIBaseCheckin() {
+  if (window._API_BASE_OVERRIDE) return window._API_BASE_OVERRIDE;
+  return (typeof API_BASE !== 'undefined') ? API_BASE : 'http://localhost:3000';
 }
-const API_BASE = getAPIBase();
 
 // ── generateTicketId — HARUS SAMA PERSIS dengan index.html & admin-qr-tamu.html ──
 function generateTicketId(name) {
@@ -389,7 +395,17 @@ function generateTicketId(name) {
 }
 
 // ── STATE ──
-const CORRECT_PIN = '082001';
+// PIN dibaca dari config.js
+const CORRECT_PIN = (typeof CONFIG !== 'undefined') ? CONFIG.checkinPin : '082001';
+
+// Update title & header dari CONFIG
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof CONFIG !== 'undefined') {
+    document.title = 'Check-In · ' + CONFIG.eventName;
+    const h = document.getElementById('checkin-header-title');
+    if (h) h.textContent = CONFIG.groom + ' & ' + CONFIG.bride + ' · Check-In';
+  }
+});
 let pinBuffer = '';
 let isAuthorized = false;
 let currentFilter = 'all';
@@ -437,7 +453,7 @@ function skipPassword() {
 async function checkConnection() {
   const dot = document.getElementById('conn-dot');
   try {
-    const res = await fetch(API_BASE + '/api/health', { signal: AbortSignal.timeout(4000) });
+    const res = await fetch(getAPIBaseCheckin() + '/api/health', { signal: AbortSignal.timeout(4000) });
     dot.className = res.ok ? 'online' : 'offline';
   } catch { dot.className = 'offline'; }
 }
@@ -463,18 +479,18 @@ function switchSection(name) {
 // ── API ──
 async function getGuests() {
   try {
-    const res = await fetch(API_BASE + '/api/rsvp');
+    const res = await fetch(getAPIBaseCheckin() + '/api/rsvp');
     if (!res.ok) throw new Error();
     allGuests = await res.json();
     return allGuests;
   } catch { showToast('⚠️ Gagal memuat data'); return allGuests; }
 }
 async function checkinGuest(ticketId) {
-  const res = await fetch(API_BASE + '/api/rsvp/checkin/' + encodeURIComponent(ticketId), { method:'PATCH' });
+  const res = await fetch(getAPIBaseCheckin() + '/api/rsvp/checkin/' + encodeURIComponent(ticketId), { method:'PATCH' });
   return await res.json();
 }
 async function undoCheckinGuest(ticketId) {
-  const res = await fetch(API_BASE + '/api/rsvp/undo/' + encodeURIComponent(ticketId), { method:'PATCH' });
+  const res = await fetch(getAPIBaseCheckin() + '/api/rsvp/undo/' + encodeURIComponent(ticketId), { method:'PATCH' });
   return await res.json();
 }
 
@@ -571,7 +587,7 @@ async function resetAll() {
   if (!isAuthorized) { showToast('🔒 Perlu login panitia'); return; }
   if (!confirm('Reset semua check-in?')) return;
   try {
-    await fetch(API_BASE + '/api/rsvp/checkins', { method:'DELETE' });
+    await fetch(getAPIBaseCheckin() + '/api/rsvp/checkins', { method:'DELETE' });
     showToast('🔄 Semua check-in direset'); renderStatus(); renderList();
   } catch { showToast('⚠️ Gagal reset'); }
 }
@@ -666,7 +682,7 @@ async function processQR(rawData) {
 
   // Single fetch — server handles ticketId + nama fallback lookups
   try {
-    const res = await fetch(API_BASE + '/api/rsvp/' + encodeURIComponent(lookupTicketId));
+    const res = await fetch(getAPIBaseCheckin() + '/api/rsvp/' + encodeURIComponent(lookupTicketId));
     if (res.ok) {
       const g = await res.json();
       if (g.checkedIn) {
@@ -718,14 +734,14 @@ async function manualCheckin() {
   if (!val) { showToast('⚠️ Masukkan nama atau Ticket ID'); return; }
   el.style.display = 'block'; el.textContent = '⏳ Mencari...'; el.style.color = 'var(--muted)';
   try {
-    let res = await fetch(API_BASE + '/api/rsvp/' + encodeURIComponent(val));
+    let res = await fetch(getAPIBaseCheckin() + '/api/rsvp/' + encodeURIComponent(val));
     if (res.ok) {
       const g = await res.json();
       if (g.checkedIn) { el.textContent = '⚠️ ' + g.nama + ' sudah check-in'; el.style.color='var(--amber)'; return; }
       await checkinGuest(g.ticketId);
       el.textContent = '✅ ' + g.nama + ' berhasil check-in!'; el.style.color='var(--green)';
     } else {
-      res = await fetch(API_BASE + '/api/rsvp/checkin-name', {
+      res = await fetch(getAPIBaseCheckin() + '/api/rsvp/checkin-name', {
         method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({nama:val})
       });
       if (res.status === 409) { const d=await res.json(); el.textContent='⚠️ '+(d.guest?.nama||val)+' sudah check-in'; el.style.color='var(--amber)'; return; }
@@ -748,8 +764,8 @@ async function renderMeja() {
   let rsvpList = [], guestList = [];
   try {
     const [rRes, gRes] = await Promise.all([
-      fetch(API_BASE + '/api/rsvp'),
-      fetch(API_BASE + '/api/guests')
+      fetch(getAPIBaseCheckin() + '/api/rsvp'),
+      fetch(getAPIBaseCheckin() + '/api/guests')
     ]);
     if (rRes.ok) rsvpList = await rRes.json();
     if (gRes.ok) guestList = await gRes.json();

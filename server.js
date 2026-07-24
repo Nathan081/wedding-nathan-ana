@@ -187,7 +187,7 @@ app.post('/api/rsvp', async (req, res) => {
       ticketId,
       nama,
       email: email || '',
-      hadir: hadir || 'Hadir',
+      hadir: hadir || 'Belum RSVP',
       jumlah: jumlah || 1,
       alergi: alergi || '',
       checkedIn: false,
@@ -204,6 +204,14 @@ app.post('/api/rsvp', async (req, res) => {
 app.delete('/api/rsvp/checkins', async (req, res) => {
   try {
     await db.collection('rsvp').updateMany({}, { $set: { checkedIn: false }, $unset: { checkedInAt: '' } });
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// DELETE single RSVP-only guest by Mongo _id (guest yang RSVP sendiri, tidak ada di collection 'guests')
+app.delete('/api/rsvp/id/:id', async (req, res) => {
+  try {
+    await db.collection('rsvp').deleteOne({ _id: new ObjectId(req.params.id) });
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -301,6 +309,28 @@ app.patch('/api/rsvp/:ticketId', async (req, res) => {
     await db.collection('rsvp').updateOne(
       { ticketId: req.params.ticketId },
       { $set: update }
+    );
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ─── SEATING LAYOUT (denah meja) ──────────────────────────────────────────────
+
+app.get('/api/seating', async (req, res) => {
+  try {
+    const doc = await db.collection('seating').findOne({ _id: 'layout' });
+    res.json(doc ? (doc.tables || []) : []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put('/api/seating', async (req, res) => {
+  try {
+    const { tables } = req.body;
+    if (!Array.isArray(tables)) return res.status(400).json({ error: 'tables array required' });
+    await db.collection('seating').updateOne(
+      { _id: 'layout' },
+      { $set: { tables, updatedAt: new Date().toISOString() } },
+      { upsert: true }
     );
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }

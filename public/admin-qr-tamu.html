@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Admin QR Tamu — Nathan & Ana Wedding</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 #login-screen {
@@ -44,6 +45,7 @@
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('main-content').style.display = 'block';
       loadData();
+      loadWaTemplate();
     } else {
       document.getElementById('login-error').style.display = 'block';
       document.getElementById('login-pass').value = '';
@@ -52,10 +54,20 @@
   window.loginKeydown = function(e) { if(e.key==='Enter') window.doLogin(); };
 
   document.addEventListener('DOMContentLoaded', function() {
+    // Sinkronkan judul & subjudul dengan config.js (nama, tanggal, venue)
+    const titleEl = document.getElementById('page-title');
+    const subtitleEl = document.getElementById('page-subtitle');
+    const loginSubtitleEl = document.getElementById('login-subtitle');
+    if (titleEl) titleEl.textContent = '💍 Admin QR Tamu';
+    if (subtitleEl) subtitleEl.textContent = CONFIG.eventName + ' · ' + CONFIG.eventDateStr + ' · ' + CONFIG.venueName;
+    if (loginSubtitleEl) loginSubtitleEl.textContent = CONFIG.eventName + ' · ' + CONFIG.eventDateStr;
+    document.title = 'Admin QR Tamu — ' + CONFIG.eventName;
+
     if (sessionStorage.getItem(KEY) === '1') {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('main-content').style.display = 'block';
       loadData();
+      loadWaTemplate();
     } else {
       document.getElementById('login-screen').style.display = 'flex';
       document.getElementById('main-content').style.display = 'none';
@@ -189,6 +201,26 @@ header p { opacity:0.85; font-size:0.95rem; }
 }
 .search-input:focus { border-color:var(--rose); }
 
+/* SEATING LAYOUT */
+.layout-canvas-wrap{width:100%;overflow:auto;border:1.5px solid #e8ddd8;border-radius:12px;background:repeating-linear-gradient(0deg,#faf6f3,#faf6f3 24px,#f2ece7 24px,#f2ece7 25px),repeating-linear-gradient(90deg,#faf6f3,#faf6f3 24px,#f2ece7 24px,#f2ece7 25px);max-height:70vh;}
+.layout-canvas{position:relative;width:1600px;height:1100px;}
+.seat-table{position:absolute;display:flex;align-items:center;justify-content:center;background:#fff;border:2px solid var(--rose);box-shadow:0 2px 8px rgba(0,0,0,0.08);cursor:grab;user-select:none;touch-action:none;}
+.seat-table.dragging{cursor:grabbing;z-index:50;box-shadow:0 6px 18px rgba(0,0,0,0.18);}
+.seat-table.circle{border-radius:50%;}
+.seat-table.rect{border-radius:10px;}
+.seat-table-label{font-family:'Jost',sans-serif;font-weight:700;font-size:0.8rem;color:#5a4a42;text-align:center;padding:4px;pointer-events:none;max-width:90%;overflow-wrap:break-word;}
+.seat-table-del{position:absolute;top:-10px;right:-10px;width:22px;height:22px;border-radius:50%;background:#e74c3c;color:#fff;border:2px solid #fff;font-size:0.7rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5;}
+.seat-btn{position:absolute;width:34px;height:34px;border-radius:50%;background:#fff;border:2px solid #d8c9c2;font-family:'Jost',sans-serif;font-size:0.55rem;font-weight:600;color:#8a7d75;display:flex;align-items:center;justify-content:center;cursor:pointer;transform:translate(-50%,-50%);text-align:center;line-height:1.1;overflow:hidden;padding:2px;}
+.seat-btn.filled{background:var(--rose);border-color:var(--rose);color:#fff;}
+.seat-popup{position:absolute;background:#fff;border:1.5px solid #e8ddd8;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.2);padding:0.6rem;z-index:100;min-width:200px;}
+.seat-popup select{width:100%;padding:0.5rem;border-radius:8px;border:1.5px solid #e8ddd8;font-family:'Jost',sans-serif;font-size:0.85rem;}
+.seat-popup .seat-popup-title{font-size:0.75rem;color:#8a7d75;margin-bottom:0.4rem;font-weight:600;}
+.seat-table.deco{background:#fdf3e7;border:2px dashed #d9a441;border-radius:12px;flex-direction:column;gap:2px;cursor:grab;}
+.seat-table.deco .deco-icon{font-size:1.6rem;pointer-events:none;}
+.seat-table.deco .seat-table-label{color:#a3762f;}
+.seat-table.textbox{background:rgba(255,255,255,0.7);border:1.5px dashed #b8a89f;border-radius:8px;box-shadow:none;}
+.seat-table.textbox .seat-table-label{color:#5a4a42;font-size:0.82rem;}
+
 /* GUEST LIST */
 .guest-grid {
   display:grid;
@@ -286,6 +318,68 @@ header p { opacity:0.85; font-size:0.95rem; }
 /* STATS extra */
 .stat-card.rsvp .stat-num{color:#27ae60;}
 
+/* WA BLAST BOX */
+.wa-box {
+  background:#fff;
+  border-radius:16px;
+  padding:1.8rem;
+  box-shadow:0 4px 20px rgba(232,41,74,0.09);
+  margin-bottom:2rem;
+}
+.wa-box h2 { font-size:1.1rem; font-weight:600; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem; }
+.wa-box p { font-size:0.82rem; color:var(--muted); margin-bottom:0.8rem; }
+.wa-box textarea {
+  width:100%;
+  padding:0.8rem 1rem;
+  border:1.5px solid #e8ddd8;
+  border-radius:10px;
+  font-family:'Jost',sans-serif;
+  font-size:0.9rem;
+  outline:none;
+  resize:vertical;
+  min-height:120px;
+  margin-bottom:0.6rem;
+  transition:border-color 0.2s;
+}
+.wa-box textarea:focus { border-color:var(--rose); }
+.wa-box .tip { font-size:0.75rem; color:var(--muted); margin-bottom:0.8rem; }
+.wa-box .tip code { background:var(--rose-light); color:var(--rose); padding:0.05rem 0.35rem; border-radius:4px; }
+
+/* MAIN TABS */
+.main-tabs { display:flex; gap:0.6rem; margin-bottom:1.2rem; }
+.main-tab {
+  padding:0.6rem 1.2rem; border-radius:10px; border:1.5px solid #e8ddd8;
+  background:#fff; color:var(--muted); font-family:'Jost',sans-serif;
+  font-size:0.88rem; font-weight:600; cursor:pointer;
+}
+.main-tab.active { background:var(--rose); border-color:var(--rose); color:#fff; }
+.tab-section { display:none; }
+.tab-section.active { display:block; }
+
+/* PER-MEJA VIEW */
+.meja-card {
+  background:#fff; border-radius:14px; padding:1.2rem 1.4rem;
+  box-shadow:0 2px 16px rgba(232,41,74,0.07); margin-bottom:1rem;
+}
+.meja-card-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:0.6rem; padding-bottom:0.6rem; border-bottom:1px solid var(--rose-light);
+}
+.meja-card-title { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--rose); font-weight:700; }
+.meja-card-count { font-size:0.78rem; color:var(--muted); font-weight:600; }
+.meja-guest-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0.5rem 0.2rem; border-bottom:1px dashed #f0e6e6;
+  font-size:0.9rem;
+}
+.meja-guest-row:last-child { border-bottom:none; }
+.meja-status {
+  font-size:0.72rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:20px;
+  white-space:nowrap;
+}
+.meja-status.in { background:#e8f8ef; color:#27ae60; }
+.meja-status.out { background:#fff8e1; color:#f39c12; }
+
 .toast {
   position:fixed; bottom:1.5rem; right:1.5rem;
   background:var(--dark); color:#fff;
@@ -312,7 +406,7 @@ header p { opacity:0.85; font-size:0.95rem; }
   <div class="login-box">
     <div class="lock">👑</div>
     <h2>Admin Area</h2>
-    <p>Nathan &amp; Ana Wedding · 26 December 2026</p>
+    <p id="login-subtitle">Nathan &amp; Ana Wedding · 26 December 2026</p>
     <input type="password" id="login-pass" placeholder="Masukkan password" onkeydown="loginKeydown(event)" autofocus/>
     <button onclick="doLogin()">🔓 Masuk</button>
     <div class="login-error" id="login-error">❌ Password salah, coba lagi!</div>
@@ -323,8 +417,8 @@ header p { opacity:0.85; font-size:0.95rem; }
 <div id="main-content">
 
 <header>
-  <h1>💍 Admin QR Tamu</h1>
-  <p>Nathan &amp; Ana Wedding · 26 December 2026 · GSJS Pakuwon Mall Surabaya</p>
+  <h1 id="page-title">💍 Admin QR Tamu</h1>
+  <p id="page-subtitle">Nathan &amp; Ana Wedding · 26 December 2026 · GSJS Pakuwon Mall Surabaya</p>
 </header>
 
 <div class="container">
@@ -384,19 +478,111 @@ Rina Wati
     </div>
   </div>
 
-  <!-- CONTROLS -->
-  <div class="controls">
-    <input type="text" class="search-input" id="search-input"
-      placeholder="🔍 Cari nama tamu..."
-      oninput="renderGuests()"/>
-    <button class="btn" onclick="downloadAllQR()">⬇️ Download Semua QR</button>
+  <!-- WA BLAST MESSAGE -->
+  <div class="wa-box">
+    <h2>📢 Pesan WhatsApp Blast</h2>
+    <p>Atur template pesan yang dipakai tombol "💬 WA" per tamu maupun "📤 Blast Semua". Pesan ini otomatis tersimpan.</p>
+    <textarea id="wa-template" oninput="saveWaTemplate()"></textarea>
+    <div class="tip">Placeholder yang bisa dipakai: <code>{nama}</code> = nama tamu, <code>{link}</code> = link undangan personal, <code>{tanggal}</code> = tanggal acara, <code>{venue}</code> = lokasi acara.</div>
+    <div style="display:flex;gap:0.8rem;flex-wrap:wrap;">
+      <button class="btn btn-outline" onclick="resetWaTemplate()">↩️ Kembalikan Default</button>
+      <button class="btn" onclick="blastAll()">📤 Blast Semua (yang ada No. HP)</button>
+    </div>
   </div>
 
-  <!-- GUEST GRID -->
-  <div class="guest-grid" id="guest-grid">
-    <div class="empty">
-      <div>👥</div>
-      <p>Belum ada tamu. Tambahkan nama tamu di atas!</p>
+  <!-- MAIN TABS -->
+  <div class="main-tabs">
+    <button class="main-tab active" id="maintab-btn-list" onclick="switchMainTab('list')">👥 Daftar Tamu</button>
+    <button class="main-tab" id="maintab-btn-meja" onclick="switchMainTab('meja')">🪑 Per Meja &amp; Check-in</button>
+    <button class="main-tab" id="maintab-btn-layout" onclick="switchMainTab('layout')">🗺️ Layout Meja</button>
+  </div>
+
+  <!-- TAB: DAFTAR TAMU -->
+  <div class="tab-section active" id="maintab-list">
+    <!-- CONTROLS -->
+    <div class="controls">
+      <input type="text" class="search-input" id="search-input"
+        placeholder="🔍 Cari nama tamu..."
+        oninput="renderGuests()"/>
+      <select class="search-input" id="status-filter" style="max-width:190px;flex:0 0 auto;" onchange="renderGuests()">
+        <option value="all">Semua Status</option>
+        <option value="Hadir">✅ Hadir</option>
+        <option value="Tidak Hadir">❌ Tidak Hadir</option>
+        <option value="Belum RSVP">⏳ Belum RSVP</option>
+      </select>
+      <button class="btn" onclick="downloadAllQR()">⬇️ Download Semua QR</button>
+    </div>
+
+    <!-- GUEST GRID -->
+    <div class="guest-grid" id="guest-grid">
+      <div class="empty">
+        <div>👥</div>
+        <p>Belum ada tamu. Tambahkan nama tamu di atas!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: PER MEJA -->
+  <div class="tab-section" id="maintab-meja">
+    <div class="controls">
+      <input type="text" class="search-input" id="meja-search-input"
+        placeholder="🔍 Cari nama tamu atau no. meja..."
+        oninput="renderMeja()"/>
+    </div>
+    <div id="meja-grid">
+      <div class="empty"><div>🪑</div><p>Belum ada tamu dengan no. meja.</p></div>
+    </div>
+  </div>
+
+  <!-- TAB: LAYOUT MEJA (drag & drop seating plan) -->
+  <div class="tab-section" id="maintab-layout">
+    <div class="bulk-box">
+      <h2>⚡ Generate Meja Cepat</h2>
+      <p>Isi pola nama, model, jumlah kursi per meja, dan berapa banyak meja yang mau dibuat sekaligus.</p>
+      <div style="display:flex;gap:0.8rem;flex-wrap:wrap;margin-bottom:0.8rem;">
+        <div style="flex:1;min-width:140px;">
+          <label style="font-size:0.75rem;color:#8a7d75;display:block;margin-bottom:4px;">Nama Meja</label>
+          <input type="text" id="gen-table-name" class="search-input" placeholder="Meja" value="Meja"/>
+        </div>
+        <div style="flex:1;min-width:140px;">
+          <label style="font-size:0.75rem;color:#8a7d75;display:block;margin-bottom:4px;">Model Meja</label>
+          <select id="gen-table-shape" class="search-input">
+            <option value="circle">⭕ Bulat</option>
+            <option value="rect">▭ Kotak</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:140px;">
+          <label style="font-size:0.75rem;color:#8a7d75;display:block;margin-bottom:4px;">Jumlah Kursi / Meja</label>
+          <input type="number" id="gen-table-capacity" class="search-input" min="2" max="16" value="8"/>
+        </div>
+        <div style="flex:1;min-width:140px;">
+          <label style="font-size:0.75rem;color:#8a7d75;display:block;margin-bottom:4px;">Jumlah Meja</label>
+          <input type="number" id="gen-table-count" class="search-input" min="1" max="50" value="5"/>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.8rem;flex-wrap:wrap;">
+        <button class="btn" onclick="generateTablesQuick()">⚡ Generate Meja</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" onclick="addTable('circle')">⭕ Tambah Meja Bulat</button>
+      <button class="btn" onclick="addTable('rect')">▭ Tambah Meja Kotak</button>
+      <button class="btn btn-outline" onclick="addTextBox()">📝 Tambah Keterangan</button>
+      <select class="search-input" id="deco-type-select" style="max-width:170px;flex:0 0 auto;">
+        <option value="stage">🎤 Panggung</option>
+        <option value="dj">🎧 DJ Booth</option>
+        <option value="cake">🎂 Meja Kue</option>
+        <option value="bar">🍸 Bar</option>
+        <option value="entrance">🚪 Pintu Masuk</option>
+        <option value="dance">💃 Dance Floor</option>
+      </select>
+      <button class="btn btn-outline" onclick="addDecoObject(document.getElementById('deco-type-select').value)">+ Tambah Objek</button>
+      <span style="font-size:0.85rem;color:#8a7d75;width:100%;">Klik kursi kosong buat pilih nama tamu. Drag badan meja/objek buat pindah posisi.</span>
+      <span id="layout-save-status" style="font-size:0.8rem;color:#27ae60;margin-left:auto;"></span>
+    </div>
+    <div class="layout-canvas-wrap">
+      <div class="layout-canvas" id="layout-canvas"></div>
     </div>
   </div>
 
@@ -406,17 +592,9 @@ Rina Wati
 
 <script>
 // ── CONFIG ──
-// Semua file (index, admin, checkin) ada di folder public/ dan diakses via Express.
-// origin otomatis = URL server → tidak perlu hardcode apapun.
-const SERVER_URL = 'http://localhost:3000'; // ← ganti jika deploy ke VPS/cloud
-function getAPIBase() {
-  const origin = window.location.origin;
-  if (!origin || origin === 'null' || window.location.protocol === 'file:') return SERVER_URL;
-  const staticHosts = ['netlify.app', 'github.io', 'vercel.app', 'pages.dev', 'surge.sh'];
-  if (staticHosts.some(h => origin.includes(h))) return SERVER_URL;
-  return origin; // ← semua file via Express: origin = server URL ✓
-}
-const API_BASE = getAPIBase();
+// API_BASE dan getAPIBase() sudah didefinisikan secara global oleh config.js
+// (dimuat di <head>). Jangan deklarasikan ulang di sini — akan menyebabkan
+// "Identifier 'API_BASE' has already been declared" dan mematikan seluruh script ini.
 console.log('📡 API_BASE:', API_BASE);
 
 // Same deterministic ticketId as index.html — same name = same QR always
@@ -428,6 +606,145 @@ function generateTicketId(name) {
 }
 let allGuests = []; // merged: admin guests + rsvp guests
 let qrInstances = {};
+
+// ── WA BLAST TEMPLATE ──
+const WA_TEMPLATE_KEY = 'nathan_ana_wa_template';
+function defaultWaTemplate() {
+  return 'Halo {nama}!\n\n' +
+  'Kamu diundang ke ' + CONFIG.eventName + '\n' +
+  'Tanggal : ' + CONFIG.eventDateStr + '\n' +
+  'Lokasi  : ' + CONFIG.venueName + '\n\n' +
+  'Buka link undangan personal kamu:\n' +
+  '{link}\n\n' +
+  'Sampai jumpa di hari istimewa kami!';
+}
+const DEFAULT_WA_TEMPLATE = defaultWaTemplate();
+
+function loadWaTemplate() {
+  const saved = localStorage.getItem(WA_TEMPLATE_KEY);
+  const ta = document.getElementById('wa-template');
+  if (ta) ta.value = saved || DEFAULT_WA_TEMPLATE;
+}
+function saveWaTemplate() {
+  const ta = document.getElementById('wa-template');
+  if (ta) localStorage.setItem(WA_TEMPLATE_KEY, ta.value);
+}
+function resetWaTemplate() {
+  const ta = document.getElementById('wa-template');
+  if (ta) { ta.value = DEFAULT_WA_TEMPLATE; saveWaTemplate(); showToast('↩️ Template dikembalikan ke default'); }
+}
+function buildWaMessage(name, url) {
+  const ta = document.getElementById('wa-template');
+  const template = (ta && ta.value.trim()) ? ta.value : DEFAULT_WA_TEMPLATE;
+  return template
+    .replaceAll('{nama}', name)
+    .replaceAll('{link}', url)
+    .replaceAll('{tanggal}', CONFIG.eventDateStr)
+    .replaceAll('{venue}', CONFIG.venueName);
+}
+
+// ── MAIN TABS ──
+function switchMainTab(name) {
+  ['list','meja','layout'].forEach(t => {
+    document.getElementById('maintab-' + t).classList.toggle('active', t === name);
+    document.getElementById('maintab-btn-' + t).classList.toggle('active', t === name);
+  });
+  if (name === 'meja') renderMeja();
+  if (name === 'layout') initLayoutTab();
+}
+
+// ── PER MEJA (grouped by table number, with check-in status) ──
+function renderMeja() {
+  const grid = document.getElementById('meja-grid');
+  const q = (document.getElementById('meja-search-input')?.value || '').toLowerCase();
+
+  const withTable = allGuests.filter(g => (g.tableNo || '').toString().trim());
+  const noTable = allGuests.filter(g => !(g.tableNo || '').toString().trim());
+
+  const tableMap = {};
+  withTable.forEach(g => {
+    const t = g.tableNo.toString().trim();
+    if (!tableMap[t]) tableMap[t] = [];
+    tableMap[t].push(g);
+  });
+
+  const matches = g => !q ||
+    g.name.toLowerCase().includes(q) ||
+    (g.tableNo || '').toString().toLowerCase().includes(q);
+
+  const sortedTables = Object.keys(tableMap).sort((a,b) => {
+    const na = parseInt(a) || 0, nb = parseInt(b) || 0;
+    return na !== nb ? na - nb : a.localeCompare(b);
+  });
+
+  const filteredTables = sortedTables.filter(t =>
+    t.toLowerCase().includes(q) || tableMap[t].some(matches));
+  const filteredNoTable = noTable.filter(matches);
+
+  if (!filteredTables.length && !filteredNoTable.length) {
+    grid.innerHTML = '<div class="empty"><div>🔍</div><p>' +
+      (allGuests.length ? 'Tidak ada hasil pencarian.' : 'Belum ada tamu dengan no. meja.') + '</p></div>';
+    return;
+  }
+
+  let html = '';
+  filteredTables.forEach(t => {
+    const gList = tableMap[t].filter(matches);
+    if (!gList.length) return;
+    const cin = gList.filter(g => g.rsvp && g.rsvp.checkedIn).length;
+    html += `<div class="meja-card">
+      <div class="meja-card-header">
+        <span class="meja-card-title">🪑 Meja ${escHtml(t)}</span>
+        <span class="meja-card-count">${cin}/${gList.length} sudah check-in</span>
+      </div>`;
+    gList.forEach(g => {
+      const checkedIn = !!(g.rsvp && g.rsvp.checkedIn);
+      html += `<div class="meja-guest-row">
+        <span>👤 ${escHtml(g.name)}</span>
+        <span class="meja-status ${checkedIn ? 'in' : 'out'}">${checkedIn ? '✅ Sudah check-in' : '⏳ Belum check-in'}</span>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  if (filteredNoTable.length) {
+    html += `<div class="meja-card">
+      <div class="meja-card-header">
+        <span class="meja-card-title">⚠️ Belum Ada Meja</span>
+        <span class="meja-card-count">${filteredNoTable.length} tamu</span>
+      </div>`;
+    filteredNoTable.forEach(g => {
+      const checkedIn = !!(g.rsvp && g.rsvp.checkedIn);
+      html += `<div class="meja-guest-row">
+        <span>👤 ${escHtml(g.name)}</span>
+        <span class="meja-status ${checkedIn ? 'in' : 'out'}">${checkedIn ? '✅ Sudah check-in' : '⏳ Belum check-in'}</span>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  grid.innerHTML = html;
+}
+
+// ── BLAST WA (kirim ke semua tamu yang punya No. HP, satu per satu) ──
+function blastAll() {
+  const targets = allGuests.filter(g => {
+    const clean = (g.phone || '').replace(/\D/g,'');
+    return clean.length >= 10;
+  });
+  if (!targets.length) { showToast('⚠️ Belum ada tamu dengan No. HP terisi!'); return; }
+  if (!confirm('Buka WhatsApp untuk ' + targets.length + ' tamu satu per satu? Browser mungkin akan minta izin buka banyak tab/popup.')) return;
+  showToast('📤 Membuka WA untuk ' + targets.length + ' tamu...');
+  targets.forEach((g, i) => {
+    setTimeout(() => {
+      const guestUrl = getGuestUrl(g.name);
+      const phoneClean = g.phone.replace(/\D/g,'');
+      const waNum = phoneClean.startsWith('0') ? '62' + phoneClean.slice(1) : phoneClean;
+      const msg = encodeURIComponent(buildWaMessage(g.name, guestUrl));
+      window.open('https://wa.me/' + waNum + '?text=' + msg, '_blank');
+    }, i * 700);
+  });
+}
 
 // Load both guests and rsvp collections, merge them
 async function loadData() {
@@ -491,11 +808,15 @@ async function loadData() {
 
     allGuests = merged;
 
+    // Keep the Per Meja tab in sync too if it's currently visible
+    const mejaTab = document.getElementById('maintab-meja');
+    if (mejaTab && mejaTab.classList.contains('active')) renderMeja();
+
     const savedUrl = localStorage.getItem('nathan_ana_base_url') || '';
     document.getElementById('base-url').value = savedUrl;
 
     // Update stats
-    const rsvpCount = allGuests.filter(g => g.rsvp).length;
+    const rsvpCount = allGuests.filter(g => g.rsvp && g.rsvp.hadir && g.rsvp.hadir !== 'Belum RSVP').length;
     const hadirCount = allGuests.filter(g => g.rsvp && g.rsvp.hadir === 'Hadir').length;
     document.getElementById('stat-total').textContent = allGuests.length;
     document.getElementById('stat-rsvp').textContent = rsvpCount;
@@ -537,7 +858,7 @@ async function ensureRSVP(name) {
   await fetch(API_BASE + '/api/rsvp', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ticketId, nama: name, hadir: 'Hadir', jumlah: 1, alergi: '' })
+    body: JSON.stringify({ ticketId, nama: name, hadir: 'Belum RSVP', jumlah: 1, alergi: '' })
   });
 }
 
@@ -590,11 +911,16 @@ async function addBulk() {
 
 async function removeGuest(id, source) {
   try {
+    let res;
     if (source === 'admin') {
-      await fetch(API_BASE + '/api/guests/' + id, { method: 'DELETE' });
+      res = await fetch(API_BASE + '/api/guests/' + id, { method: 'DELETE' });
     } else {
-      // RSVP-only guest — just note, or delete from rsvp
-      await fetch(API_BASE + '/api/guests/' + id, { method: 'DELETE' }).catch(() => {});
+      // RSVP-only guest (self-registered, tidak ada di collection 'guests')
+      res = await fetch(API_BASE + '/api/rsvp/id/' + id, { method: 'DELETE' });
+    }
+    if (!res.ok) {
+      showToast('⚠️ Gagal hapus tamu (server error ' + res.status + '). Pastikan server.js sudah versi terbaru.');
+      return;
     }
     showToast('🗑️ Tamu dihapus');
     loadData();
@@ -614,10 +940,16 @@ async function clearAll() {
 function renderGuests() {
   const grid = document.getElementById('guest-grid');
   const search = document.getElementById('search-input').value.toLowerCase();
-  const filtered = allGuests.filter(g => g.name.toLowerCase().includes(search));
+  const statusFilter = document.getElementById('status-filter').value;
+  const filtered = allGuests.filter(g => {
+    if (!g.name.toLowerCase().includes(search)) return false;
+    if (statusFilter === 'all') return true;
+    const status = (g.rsvp && g.rsvp.hadir) ? g.rsvp.hadir : 'Belum RSVP';
+    return status === statusFilter;
+  });
 
   document.getElementById('stat-total').textContent = allGuests.length;
-  document.getElementById('stat-rsvp').textContent = allGuests.filter(g => g.rsvp).length;
+  document.getElementById('stat-rsvp').textContent = allGuests.filter(g => g.rsvp && g.rsvp.hadir && g.rsvp.hadir !== 'Belum RSVP').length;
   document.getElementById('stat-hadir').textContent = allGuests.filter(g => g.rsvp && g.rsvp.hadir === 'Hadir').length;
   document.getElementById('stat-qr').textContent = allGuests.length;
 
@@ -639,8 +971,9 @@ function renderGuests() {
     // RSVP badge
     let rsvpBadge = '<span class="badge-rsvp pending">⏳ Belum RSVP</span>';
     if (guest.rsvp) {
-      if (guest.rsvp.hadir === 'Hadir') rsvpBadge = '<span class="badge-rsvp hadir">✅ Hadir' + (guest.rsvp.jumlah ? ' (' + guest.rsvp.jumlah + ' org)' : '') + '</span>';
+      if (guest.rsvp.hadir === 'Hadir') rsvpBadge = '<span class="badge-rsvp hadir">✅ Hadir</span>';
       else if (guest.rsvp.hadir === 'Tidak Hadir') rsvpBadge = '<span class="badge-rsvp tidak">❌ Tidak Hadir</span>';
+      else if (guest.rsvp.hadir === 'Belum RSVP' || !guest.rsvp.hadir) rsvpBadge = '<span class="badge-rsvp pending">⏳ Belum RSVP</span>';
       else rsvpBadge = '<span class="badge-rsvp hadir">✅ RSVP</span>';
     }
 
@@ -713,9 +1046,9 @@ function renderGuests() {
           id: tId,
           nama: guest.name,
           hadir: (guest.rsvp && guest.rsvp.hadir) ? guest.rsvp.hadir : 'Hadir',
-          event: 'Nathan & Ana Wedding',
-          date: '26 December 2026',
-          venue: 'GSJS Pakuwon Mall Surabaya'
+          event: CONFIG.eventName,
+          date: CONFIG.eventDateStr,
+          venue: CONFIG.venueName
         });
         new QRCode(qrEl, {
           text: qrText,
@@ -770,15 +1103,7 @@ function shareWA(name, url, waNum) {
   const baseUrl = getBaseUrl().replace(/\/+$/, '');
   const cleanUrl = baseUrl + '/?tamu=' + encodeURIComponent(name);
 
-  const msg = encodeURIComponent(
-    'Halo ' + name + '!\n\n' +
-    'Kamu diundang ke pernikahan Nathan & Ana\n' +
-    'Tanggal : 26 December 2026\n' +
-    'Lokasi  : GSJS Pakuwon Mall Surabaya\n\n' +
-    'Buka link undangan personal kamu:\n' +
-    cleanUrl + '\n\n' +
-    'Sampai jumpa di hari istimewa kami!'
-  );
+  const msg = encodeURIComponent(buildWaMessage(name, cleanUrl));
   if (waNum && waNum.length >= 10) {
     window.open('https://wa.me/' + waNum + '?text=' + msg, '_blank');
   } else {
@@ -808,10 +1133,10 @@ function downloadQR(id, name) {
   roundRect(ctx, 8, 8, 344, 444, 16); ctx.stroke();
 
   ctx.fillStyle = '#e8294a'; ctx.font = 'bold 18px serif'; ctx.textAlign = 'center';
-  ctx.fillText('Nathan & Ana', 180, 45);
+  ctx.fillText(CONFIG.groom + ' & ' + CONFIG.bride, 180, 45);
   ctx.fillStyle = '#7a6a6a'; ctx.font = '12px sans-serif';
-  ctx.fillText('26 December 2026', 180, 64);
-  ctx.fillText('GSJS Pakuwon Mall, Surabaya', 180, 80);
+  ctx.fillText(CONFIG.eventDateStr, 180, 64);
+  ctx.fillText(CONFIG.venueName, 180, 80);
 
   ctx.strokeStyle = '#fce8ec'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(30,92); ctx.lineTo(330,92); ctx.stroke();
@@ -861,8 +1186,407 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3500);
 }
 
+// ════════════════════════════════════
+//  LAYOUT MEJA (drag & drop seating plan)
+// ════════════════════════════════════
+let seatingTables = [];
+let layoutLoaded = false;
+let layoutSaveTimer = null;
+let activeSeatPopup = null;
+
+async function initLayoutTab() {
+  if (layoutLoaded) { renderLayoutCanvas(); return; }
+  try {
+    const res = await fetch(API_BASE + '/api/seating');
+    if (res.ok) seatingTables = await res.json();
+  } catch (e) { showToast('⚠️ Gagal memuat layout meja.'); }
+  layoutLoaded = true;
+  renderLayoutCanvas();
+}
+
+const DECO_PRESETS = {
+  stage:    { icon: '🎤', label: 'Panggung',    w: 200, h: 100 },
+  dj:       { icon: '🎧', label: 'DJ Booth',    w: 110, h: 90  },
+  cake:     { icon: '🎂', label: 'Meja Kue',    w: 90,  h: 90  },
+  bar:      { icon: '🍸', label: 'Bar',         w: 170, h: 70  },
+  entrance: { icon: '🚪', label: 'Pintu Masuk', w: 110, h: 60  },
+  dance:    { icon: '💃', label: 'Dance Floor', w: 220, h: 160 },
+};
+
+function addDecoObject(decoType) {
+  const preset = DECO_PRESETS[decoType] || DECO_PRESETS.stage;
+  const id = 'deco_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  seatingTables.push({
+    id, type: 'deco', decoType,
+    label: preset.label,
+    icon: preset.icon,
+    x: 100, y: 100,
+    w: preset.w, h: preset.h
+  });
+  renderLayoutCanvas();
+  saveLayoutDebounced();
+}
+
+function generateTablesQuick() {
+  const namePrefix = (document.getElementById('gen-table-name').value.trim() || 'Meja');
+  const shape = document.getElementById('gen-table-shape').value === 'rect' ? 'rect' : 'circle';
+  const capacity = Math.max(2, Math.min(16, parseInt(document.getElementById('gen-table-capacity').value) || 8));
+  const count = Math.max(1, Math.min(50, parseInt(document.getElementById('gen-table-count').value) || 1));
+
+  const startIndex = seatingTables.length;
+  let added = 0;
+  for (let i = 0; i < count; i++) {
+    const id = 'tbl_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6) + i;
+    seatingTables.push({
+      id, type: shape,
+      label: namePrefix + ' ' + (i + 1),
+      capacity,
+      x: 100 + ((startIndex + added) % 4) * 240,
+      y: 100 + Math.floor((startIndex + added) / 4) * 240,
+      seats: Array(capacity).fill('')
+    });
+    added++;
+  }
+
+  renderLayoutCanvas();
+  saveLayoutDebounced();
+  showToast('⚡ ' + added + ' meja berhasil dibuat!');
+}
+
+function addTextBox() {
+  const id = 'text_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  seatingTables.push({
+    id, type: 'text',
+    label: 'Ketik keterangan...',
+    x: 100, y: 100, w: 180, h: 40
+  });
+  renderLayoutCanvas();
+  saveLayoutDebounced();
+}
+
+function addTable(type) {
+  const id = 'tbl_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const capacity = type === 'circle' ? 8 : 6;
+  seatingTables.push({
+    id, type,
+    label: 'Meja ' + (seatingTables.length + 1),
+    x: 100 + (seatingTables.length % 4) * 240,
+    y: 100 + Math.floor(seatingTables.length / 4) * 240,
+    capacity,
+    seats: Array(capacity).fill('')
+  });
+  renderLayoutCanvas();
+  saveLayoutDebounced();
+}
+
+function deleteTable(id) {
+  const t = seatingTables.find(t => t.id === id);
+  const what = t && t.type === 'text' ? 'keterangan' : (t && t.type === 'deco' ? 'objek' : 'meja ini (beserta penempatan tamunya)');
+  if (!confirm('Hapus ' + what + '?')) return;
+  seatingTables = seatingTables.filter(t => t.id !== id);
+  renderLayoutCanvas();
+  saveLayoutDebounced();
+}
+
+function renameTable(id, newLabel) {
+  const t = seatingTables.find(t => t.id === id);
+  if (!t) return;
+  t.label = newLabel.trim() || t.label;
+  saveLayoutDebounced();
+}
+
+function getSeatPositions(table) {
+  const positions = [];
+  if (table.type === 'circle') {
+    const R = 36 + table.capacity * 3.2;
+    const seatR = R + 24;
+    for (let i = 0; i < table.capacity; i++) {
+      const angle = (i / table.capacity) * Math.PI * 2 - Math.PI / 2;
+      positions.push({ x: Math.cos(angle) * seatR, y: Math.sin(angle) * seatR });
+    }
+    table._w = table._h = R * 2;
+  } else {
+    const top = Math.ceil(table.capacity / 2), bottom = table.capacity - top;
+    const w = Math.max(90, Math.max(top, bottom) * 44);
+    const h = 70;
+    for (let i = 0; i < top; i++) positions.push({ x: -w/2 + (w/(top+1))*(i+1), y: -h/2 - 26 });
+    for (let i = 0; i < bottom; i++) positions.push({ x: -w/2 + (w/(bottom+1))*(i+1), y: h/2 + 26 });
+    table._w = w; table._h = h;
+  }
+  return positions;
+}
+
+function renderLayoutCanvas() {
+  const canvas = document.getElementById('layout-canvas');
+  canvas.innerHTML = '';
+  closeSeatPopup();
+
+  seatingTables.forEach(table => {
+    if (table.type === 'deco') { canvas.appendChild(buildDecoEl(table)); return; }
+    if (table.type === 'text') { canvas.appendChild(buildTextBoxEl(table)); return; }
+
+    const seatPositions = getSeatPositions(table);
+    const w = table._w, h = table._h;
+
+    const el = document.createElement('div');
+    el.className = 'seat-table ' + table.type;
+    el.style.left = table.x + 'px';
+    el.style.top = table.y + 'px';
+    el.style.width = w + 'px';
+    el.style.height = h + 'px';
+    el.dataset.id = table.id;
+
+    const label = document.createElement('div');
+    label.className = 'seat-table-label';
+    label.innerHTML = `<div>${escHtml(table.label)}</div><div style="font-size:0.62rem;color:#a3948b;font-weight:500;margin-top:2px;">${table.capacity} kursi</div>`;
+    label.title = 'Klik untuk edit nama & jumlah kursi';
+    label.style.pointerEvents = 'auto';
+    label.style.cursor = 'pointer';
+    label.onclick = (e) => { e.stopPropagation(); openTableEditPopup(el, table); };
+    el.appendChild(label);
+
+    const del = document.createElement('div');
+    del.className = 'seat-table-del';
+    del.textContent = '✕';
+    del.onclick = (e) => { e.stopPropagation(); deleteTable(table.id); };
+    el.appendChild(del);
+
+    seatPositions.forEach((pos, i) => {
+      const guestName = table.seats[i] || '';
+      const seat = document.createElement('div');
+      seat.className = 'seat-btn' + (guestName ? ' filled' : '');
+      seat.style.left = (w/2 + pos.x) + 'px';
+      seat.style.top = (h/2 + pos.y) + 'px';
+      seat.textContent = guestName ? guestName.split(' ')[0].substring(0, 8) : (i+1);
+      seat.title = guestName || 'Kursi kosong';
+      seat.onclick = (e) => { e.stopPropagation(); openSeatPopup(seat, table.id, i); };
+      el.appendChild(seat);
+    });
+
+    makeTableDraggable(el, table);
+    canvas.appendChild(el);
+  });
+}
+
+function buildTextBoxEl(box) {
+  const el = document.createElement('div');
+  el.className = 'seat-table textbox';
+  el.style.left = box.x + 'px';
+  el.style.top = box.y + 'px';
+  el.style.width = box.w + 'px';
+  el.style.height = box.h + 'px';
+  el.dataset.id = box.id;
+
+  const label = document.createElement('div');
+  label.className = 'seat-table-label';
+  label.textContent = box.label;
+  label.title = 'Klik untuk edit teks';
+  label.style.pointerEvents = 'auto';
+  label.style.cursor = 'text';
+  label.onclick = (e) => {
+    e.stopPropagation();
+    const nn = prompt('Isi keterangan:', box.label);
+    if (nn !== null) { renameTable(box.id, nn); renderLayoutCanvas(); }
+  };
+  el.appendChild(label);
+
+  const del = document.createElement('div');
+  del.className = 'seat-table-del';
+  del.textContent = '✕';
+  del.onclick = (e) => { e.stopPropagation(); deleteTable(box.id); };
+  el.appendChild(del);
+
+  makeTableDraggable(el, box);
+  return el;
+}
+
+function buildDecoEl(deco) {
+  const el = document.createElement('div');
+  el.className = 'seat-table deco';
+  el.style.left = deco.x + 'px';
+  el.style.top = deco.y + 'px';
+  el.style.width = deco.w + 'px';
+  el.style.height = deco.h + 'px';
+  el.dataset.id = deco.id;
+
+  const icon = document.createElement('div');
+  icon.className = 'deco-icon';
+  icon.textContent = deco.icon || '📦';
+  icon.style.pointerEvents = 'none';
+  el.appendChild(icon);
+
+  const label = document.createElement('div');
+  label.className = 'seat-table-label';
+  label.textContent = deco.label;
+  label.title = 'Klik untuk ganti nama objek';
+  label.style.pointerEvents = 'auto';
+  label.style.cursor = 'text';
+  label.onclick = (e) => {
+    e.stopPropagation();
+    const nn = prompt('Nama objek:', deco.label);
+    if (nn !== null) { renameTable(deco.id, nn); renderLayoutCanvas(); }
+  };
+  el.appendChild(label);
+
+  const del = document.createElement('div');
+  del.className = 'seat-table-del';
+  del.textContent = '✕';
+  del.onclick = (e) => { e.stopPropagation(); deleteTable(deco.id); };
+  el.appendChild(del);
+
+  makeTableDraggable(el, deco);
+  return el;
+}
+
+function makeTableDraggable(el, table) {
+  let dragging = false, startX, startY, origX, origY;
+  el.addEventListener('pointerdown', (e) => {
+    if (e.target !== el) return; // jangan drag kalau klik kursi/label/tombol hapus
+    dragging = true;
+    el.classList.add('dragging');
+    el.setPointerCapture(e.pointerId);
+    startX = e.clientX; startY = e.clientY;
+    origX = table.x; origY = table.y;
+  });
+  el.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    table.x = Math.max(0, origX + dx);
+    table.y = Math.max(0, origY + dy);
+    el.style.left = table.x + 'px';
+    el.style.top = table.y + 'px';
+  });
+  el.addEventListener('pointerup', (e) => {
+    if (!dragging) return;
+    dragging = false;
+    el.classList.remove('dragging');
+    saveLayoutDebounced();
+  });
+}
+
+function closeSeatPopup() {
+  if (activeSeatPopup) { activeSeatPopup.remove(); activeSeatPopup = null; }
+}
+
+function openTableEditPopup(tableEl, table) {
+  closeSeatPopup();
+  const popup = document.createElement('div');
+  popup.className = 'seat-popup';
+  const rect = tableEl.getBoundingClientRect();
+  const canvasRect = document.getElementById('layout-canvas').getBoundingClientRect();
+  popup.style.left = (rect.left - canvasRect.left) + 'px';
+  popup.style.top = (rect.top - canvasRect.top + rect.height + 10) + 'px';
+
+  popup.innerHTML = `
+    <div class="seat-popup-title">✏️ Edit Meja</div>
+    <div style="margin-bottom:0.5rem;">
+      <label style="font-size:0.7rem;color:#8a7d75;display:block;margin-bottom:2px;">Nama Meja</label>
+      <input type="text" id="edit-table-name" value="${escHtml(table.label)}" style="width:100%;padding:0.4rem 0.6rem;border-radius:8px;border:1.5px solid #e8ddd8;font-family:'Jost',sans-serif;font-size:0.85rem;"/>
+    </div>
+    <div style="margin-bottom:0.6rem;">
+      <label style="font-size:0.7rem;color:#8a7d75;display:block;margin-bottom:2px;">Jumlah Kursi (2–16)</label>
+      <input type="number" id="edit-table-cap" min="2" max="16" value="${table.capacity}" style="width:100%;padding:0.4rem 0.6rem;border-radius:8px;border:1.5px solid #e8ddd8;font-family:'Jost',sans-serif;font-size:0.85rem;"/>
+    </div>
+    <button class="btn" style="width:100%;justify-content:center;" onclick="saveTableEdit('${table.id}')">💾 Simpan</button>
+  `;
+  document.getElementById('layout-canvas').appendChild(popup);
+  activeSeatPopup = popup;
+
+  setTimeout(() => {
+    document.addEventListener('click', function closeOnce(ev) {
+      if (popup.contains(ev.target)) return;
+      closeSeatPopup();
+      document.removeEventListener('click', closeOnce);
+    });
+  }, 0);
+}
+
+function saveTableEdit(tableId) {
+  const table = seatingTables.find(t => t.id === tableId);
+  if (!table) return;
+  const newName = document.getElementById('edit-table-name').value.trim();
+  const newCap = Math.max(2, Math.min(16, parseInt(document.getElementById('edit-table-cap').value) || table.capacity));
+  if (newName) table.label = newName;
+  if (newCap !== table.capacity) {
+    if (newCap > table.capacity) table.seats = table.seats.concat(Array(newCap - table.capacity).fill(''));
+    else table.seats = table.seats.slice(0, newCap);
+    table.capacity = newCap;
+  }
+  closeSeatPopup();
+  renderLayoutCanvas();
+  saveLayoutDebounced();
+}
+
+function openSeatPopup(seatEl, tableId, seatIndex) {
+  closeSeatPopup();
+  const table = seatingTables.find(t => t.id === tableId);
+  if (!table) return;
+  const currentGuest = table.seats[seatIndex] || '';
+
+  const popup = document.createElement('div');
+  popup.className = 'seat-popup';
+  const rect = seatEl.getBoundingClientRect();
+  const canvasRect = document.getElementById('layout-canvas').getBoundingClientRect();
+  popup.style.left = (rect.left - canvasRect.left + 20) + 'px';
+  popup.style.top = (rect.top - canvasRect.top) + 'px';
+
+  const usedElsewhere = new Set();
+  seatingTables.forEach(t => (t.seats||[]).forEach((s, i) => { if (s && !(t.id === tableId && i === seatIndex)) usedElsewhere.add(s); }));
+
+  // Cuma tamu yang statusnya "Hadir" (RSVP confirmed) yang bisa dipilih,
+  // dan yang udah duduk di kursi lain otomatis hilang dari daftar (nggak bisa dobel).
+  const eligibleGuests = allGuests.filter(g =>
+    g.rsvp && g.rsvp.hadir === 'Hadir' && !usedElsewhere.has(g.name)
+  );
+
+  const options = ['<option value="">— Kosongkan —</option>'].concat(
+    eligibleGuests.map(g => {
+      const sel = g.name === currentGuest ? 'selected' : '';
+      return `<option value="${escHtml(g.name)}" ${sel}>${escHtml(g.name)}</option>`;
+    })
+  ).join('');
+
+  const emptyNote = eligibleGuests.length ? '' : '<div style="font-size:0.72rem;color:#c0392b;margin-top:6px;">Belum ada tamu berstatus "Hadir" yang tersedia.</div>';
+  popup.innerHTML = `<div class="seat-popup-title">🪑 ${escHtml(table.label)} — Kursi ${seatIndex+1}</div><select onchange="assignSeat('${tableId}',${seatIndex},this.value)">${options}</select>${emptyNote}`;
+  document.getElementById('layout-canvas').appendChild(popup);
+  activeSeatPopup = popup;
+
+  setTimeout(() => {
+    document.addEventListener('click', function closeOnce(ev) {
+      if (popup.contains(ev.target)) return;
+      closeSeatPopup();
+      document.removeEventListener('click', closeOnce);
+    });
+  }, 0);
+}
+
+function assignSeat(tableId, seatIndex, guestName) {
+  const table = seatingTables.find(t => t.id === tableId);
+  if (!table) return;
+  table.seats[seatIndex] = guestName;
+  closeSeatPopup();
+  renderLayoutCanvas();
+  saveLayoutDebounced();
+}
+
+function saveLayoutDebounced() {
+  const status = document.getElementById('layout-save-status');
+  if (status) status.textContent = '⏳ Menyimpan...';
+  clearTimeout(layoutSaveTimer);
+  layoutSaveTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(API_BASE + '/api/seating', {
+        method: 'PUT', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ tables: seatingTables.map(({_w,_h,...t}) => t) })
+      });
+      if (status) status.textContent = res.ok ? '✅ Tersimpan' : '⚠️ Gagal simpan';
+      setTimeout(() => { if (status) status.textContent = ''; }, 2000);
+    } catch (e) { if (status) status.textContent = '⚠️ Gagal simpan'; }
+  }, 700);
+}
+
 // INIT
-if (sessionStorage.getItem('admin_auth_na') === '1') loadData();
+if (sessionStorage.getItem('admin_auth_na') === '1') { loadData(); loadWaTemplate(); }
 </script>
 </div><!-- end main-content -->
 </body>
