@@ -102,7 +102,15 @@ const CONFIG = {
     maxGuests: 200,
   },
 
-  // ── 9. SERVER ────────────────────────────────────────────────────
+  // ── 9. SOCIAL MEDIA (footer icons) ───────────────────────────────
+  // Kosongkan string ('') kalau tidak punya akun itu — ikonnya otomatis disembunyikan.
+  socials: {
+    instagram: 'https://instagram.com/',
+    whatsapp:  'https://wa.me/6281234567890',
+    facebook:  ''
+  },
+
+  // ── 10. SERVER ───────────────────────────────────────────────────
   serverUrl: 'https://wedding-nathan-ana.fly.dev'
 
 };

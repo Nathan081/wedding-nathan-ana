@@ -13,10 +13,10 @@
 :root{
   --cream:#f0e9d5;
   --cream-mid:#e8e0c6;
-  --gold-bg:#9b7c3a;
-  --gold-section:#a08040;
-  --gold:#c9a96e;
-  --gold-dark:#7a5f25;
+  --gold-bg:#5c2a1e;
+  --gold-section:#6b3323;
+  --gold:#b5794f;
+  --gold-dark:#3d1810;
   --dark:#1a1610;
   --text:#2c2418;
   --muted:#8a7a5a;
@@ -39,11 +39,11 @@ body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--text);}
 .env-guest{color:#fff;font-family:'Playfair Display',serif;font-size:clamp(1.6rem,5vw,2.8rem);text-align:center;margin-bottom:2.5rem;text-shadow:0 2px 20px rgba(201,169,110,0.5);}
 .envelope-wrap{position:relative;width:280px;height:200px;cursor:pointer;filter:drop-shadow(0 20px 60px rgba(201,169,110,0.3));}
 .envelope-wrap:hover .env-flap{transform:rotateX(180deg);}
-.env-body{position:absolute;inset:0;background:linear-gradient(135deg,#c9a96e,#e8c88a);border-radius:4px 4px 12px 12px;}
-.env-body::before{content:'';position:absolute;bottom:0;left:0;right:0;height:60%;background:linear-gradient(to top,#b8954a,#c9a96e);border-radius:0 0 12px 12px;}
-.env-left{position:absolute;bottom:0;left:0;width:0;height:0;border-style:solid;border-width:100px 0 0 140px;border-color:transparent transparent transparent #a07c3a;}
-.env-right{position:absolute;bottom:0;right:0;width:0;height:0;border-style:solid;border-width:100px 140px 0 0;border-color:transparent #a07c3a transparent transparent;}
-.env-flap{position:absolute;top:0;left:0;right:0;height:0;border-style:solid;border-width:100px 140px 0 140px;border-color:#b8954a transparent transparent transparent;transform-origin:top center;transform-style:preserve-3d;transition:transform 0.6s ease;border-radius:4px 4px 0 0;}
+.env-body{position:absolute;inset:0;background:linear-gradient(135deg,#b5794f,#caa06f);border-radius:4px 4px 12px 12px;}
+.env-body::before{content:'';position:absolute;bottom:0;left:0;right:0;height:60%;background:linear-gradient(to top,#7a3c26,#b5794f);border-radius:0 0 12px 12px;}
+.env-left{position:absolute;bottom:0;left:0;width:0;height:0;border-style:solid;border-width:100px 0 0 140px;border-color:transparent transparent transparent #4a2417;}
+.env-right{position:absolute;bottom:0;right:0;width:0;height:0;border-style:solid;border-width:100px 140px 0 0;border-color:transparent #4a2417 transparent transparent;}
+.env-flap{position:absolute;top:0;left:0;right:0;height:0;border-style:solid;border-width:100px 140px 0 140px;border-color:#7a3c26 transparent transparent transparent;transform-origin:top center;transform-style:preserve-3d;transition:transform 0.6s ease;border-radius:4px 4px 0 0;}
 .env-letter{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
 .env-letter-icon{font-size:2.5rem;display:block;animation:hb 1.5s ease infinite;}
 .env-open-btn{margin-top:2.5rem;padding:1rem 2.5rem;background:var(--gold);color:#0e0c0a;border:none;border-radius:50px;font-family:'Jost',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;letter-spacing:0.08em;box-shadow:0 8px 30px rgba(201,169,110,0.5);animation:pulse-btn 2s ease infinite;}
@@ -88,17 +88,6 @@ nav a:hover{color:var(--gold);}
 .hero-scroll-line{width:1px;height:36px;background:linear-gradient(to bottom,transparent,rgba(201,169,110,0.6),transparent);}
 @keyframes bob{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(8px);}}
 @keyframes hb{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
-
-/* ════════════════════════════════════
-   PHOTO COLLAGE SECTION (golden bg)
-═══════════════════════════════════════ */
-.photo-collage-section{background:var(--gold-bg);padding:5rem 2rem;position:relative;overflow:hidden;}
-.photo-collage-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;position:relative;z-index:2;}
-.photo-col-left{display:flex;flex-direction:column;gap:1.2rem;}
-.photo-collage-img{width:100%;border-radius:6px;display:block;box-shadow:0 10px 40px rgba(0,0,0,0.25);}
-.photo-collage-img.tall{height:300px;object-fit:cover;}
-.photo-collage-img.medium{height:210px;object-fit:cover;}
-.photo-col-right .photo-collage-img{height:100%;min-height:520px;object-fit:cover;}
 
 /* Decorative illustrations (SVG line art scattered) */
 .illus{position:absolute;opacity:0.35;pointer-events:none;}
@@ -258,14 +247,16 @@ nav a:hover{color:var(--gold);}
 .greeting-input-box textarea{resize:vertical;min-height:80px;}
 .btn-greet{width:100%;padding:0.85rem;background:#fff;color:var(--gold-bg);border:none;border-radius:8px;font-family:'Jost',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;transition:background 0.2s;letter-spacing:0.06em;}
 .btn-greet:hover{background:var(--cream);}
-.greetings-wall{overflow:hidden;position:relative;width:100%;padding:1rem 0;}
-.greetings-track{display:flex;gap:1.5rem;width:max-content;animation:marquee 30s linear infinite;}
-.greet-card{background:rgba(255,255,255,0.12);border-radius:10px;padding:1.2rem 1.5rem;min-width:260px;max-width:300px;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);}
+.greetings-wall{position:relative;width:100%;max-width:640px;margin:0 auto;max-height:420px;overflow-y:auto;padding:0.5rem 0.5rem 0.5rem 0;border-radius:10px;}
+.greetings-wall::-webkit-scrollbar{width:6px;}
+.greetings-wall::-webkit-scrollbar-track{background:rgba(255,255,255,0.08);border-radius:6px;}
+.greetings-wall::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.35);border-radius:6px;}
+.greetings-track{display:flex;flex-direction:column;gap:1rem;}
+.greet-card{background:rgba(255,255,255,0.12);border-radius:10px;padding:1.2rem 1.5rem;border:1px solid rgba(255,255,255,0.15);width:100%;}
 .greet-name{font-weight:700;font-size:0.92rem;color:#fff;margin-bottom:0.4rem;}
 .greet-msg{font-size:0.85rem;color:rgba(255,255,255,0.85);line-height:1.6;font-style:italic;margin-bottom:0.5rem;}
 .greet-time{font-size:0.72rem;color:rgba(255,255,255,0.5);}
 .no-greetings{text-align:center;color:rgba(255,255,255,0.6);padding:2rem;font-size:0.9rem;}
-@keyframes marquee{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
 
 /* ════════════════════════════════════
    GIFT (cream)
@@ -317,7 +308,7 @@ footer{background:var(--cream);border-top:1px solid rgba(154,124,58,0.2);padding
 .vinyl-wrap{position:relative;width:56px;height:56px;}
 .vinyl-disc{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at center,#222 18%,transparent 18%),radial-gradient(circle at center,#444 19%,transparent 19%),repeating-radial-gradient(circle at center,#1a1a1a 0px,#2a2a2a 2px,#1a1a1a 4px);box-shadow:0 4px 20px rgba(0,0,0,0.4);animation:spin 4s linear infinite;animation-play-state:paused;border:2px solid #333;}
 .vinyl-disc.playing{animation-play-state:running;}
-.vinyl-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:radial-gradient(circle,var(--gold) 0%,#a07c3a 100%);box-shadow:0 0 0 2px #fff,0 0 0 3px #ddd;}
+.vinyl-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:radial-gradient(circle,var(--gold) 0%,#4a2417 100%);box-shadow:0 0 0 2px #fff,0 0 0 3px #ddd;}
 .vinyl-label{background:rgba(26,22,16,0.85);backdrop-filter:blur(8px);color:#fff;border-radius:30px;padding:0.4rem 0.9rem;font-size:0.72rem;font-family:'Jost',sans-serif;font-weight:500;white-space:nowrap;max-width:160px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.3);}
 .vinyl-icon{font-size:0.8rem;margin-right:0.3rem;}
 @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
@@ -344,7 +335,7 @@ footer{background:var(--cream);border-top:1px solid rgba(154,124,58,0.2);padding
    RESPONSIVE
 ═══════════════════════════════════════ */
 @media(max-width:900px){
-  .photo-collage-inner,.encounter-inner,.events-inner,.guest-info-inner,.footer-inner{grid-template-columns:1fr;}
+  .encounter-inner,.events-inner,.guest-info-inner,.footer-inner{grid-template-columns:1fr;}
   .promise-section{grid-template-columns:1fr;}
   .promise-photo{height:300px;}
   .venue-grid{grid-template-columns:1fr;}
@@ -434,69 +425,6 @@ footer{background:var(--cream);border-top:1px solid rgba(154,124,58,0.2);padding
 <!-- ══════════════════════════════════
      PHOTO COLLAGE (golden bg)
 ══════════════════════════════════════ -->
-<section class="photo-collage-section">
-  <!-- Decorative SVG illustrations -->
-  <div class="illus" style="top:2%;right:5%;width:80px;">
-    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-      <!-- Shoes illustration -->
-      <path d="M10 55 Q20 45 40 48 Q55 50 70 44" stroke-linecap="round"/>
-      <path d="M10 55 Q8 60 15 62 Q35 65 70 55 Q78 52 75 44" stroke-linecap="round"/>
-      <path d="M40 48 L42 38 Q44 30 38 28 Q32 26 30 35 L28 48" stroke-linecap="round"/>
-      <circle cx="36" cy="26" r="3"/>
-    </svg>
-  </div>
-  <div class="illus" style="bottom:5%;left:3%;width:70px;">
-    <svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">
-      <!-- Oxford shoe -->
-      <path d="M5 70 Q20 60 45 65 Q65 68 75 60" stroke-linecap="round"/>
-      <path d="M5 70 Q3 76 10 78 Q30 82 75 70 Q82 66 78 58" stroke-linecap="round"/>
-      <path d="M20 65 L18 50 Q16 38 24 36 Q32 34 34 46 L35 65" stroke-linecap="round"/>
-    </svg>
-  </div>
-  <div class="illus" style="top:8%;left:8%;width:60px;">
-    <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
-      <!-- Gift box -->
-      <rect x="8" y="28" width="44" height="44" rx="2"/>
-      <rect x="5" y="20" width="50" height="12" rx="2"/>
-      <line x1="30" y1="20" x2="30" y2="72"/>
-      <path d="M30 20 Q22 8 16 12 Q10 16 18 22 Q24 26 30 20" stroke-linecap="round"/>
-      <path d="M30 20 Q38 8 44 12 Q50 16 42 22 Q36 26 30 20" stroke-linecap="round"/>
-    </svg>
-  </div>
-  <div class="illus" style="top:15%;right:2%;width:65px;">
-    <svg viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
-      <!-- Champagne bottle -->
-      <path d="M25 90 Q20 88 20 80 L20 50 Q18 38 22 30 L28 15 Q30 8 32 15 L38 30 Q42 38 40 50 L40 80 Q40 88 35 90 Z" stroke-linecap="round" stroke-linejoin="round"/>
-      <line x1="20" y1="50" x2="40" y2="50"/>
-      <line x1="22" y1="58" x2="38" y2="58"/>
-      <path d="M28 15 L32 15 L30 5 Z"/>
-    </svg>
-  </div>
-  <div class="illus" style="bottom:8%;right:5%;width:55px;">
-    <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
-      <!-- Lamp -->
-      <line x1="30" y1="16" x2="30" y2="65"/>
-      <ellipse cx="30" cy="68" rx="16" ry="5"/>
-      <path d="M12 16 Q16 2 30 2 Q44 2 48 16 Z"/>
-      <line x1="8" y1="16" x2="52" y2="16"/>
-    </svg>
-  </div>
-
-  <div class="photo-collage-inner reveal">
-    <div class="photo-col-left">
-      <img src="photos/photo1.jpg" alt="Wedding photo" class="photo-collage-img tall"
-           onerror="this.src='https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=70'"/>
-      <img src="photos/photo2.jpg" alt="Wedding photo" class="photo-collage-img medium"
-           onerror="this.src='https://images.unsplash.com/photo-1606800052052-a08af7148866?w=600&q=70'"/>
-    </div>
-    <div class="photo-col-right">
-      <img src="photos/photo3.jpg" alt="Wedding photo" class="photo-collage-img"
-           style="min-height:520px;height:100%;object-fit:cover;"
-           onerror="this.src='https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600&q=70'"/>
-    </div>
-  </div>
-</section>
-
 <!-- ══════════════════════════════════
      A CHANCE ENCOUNTER (cream)
 ══════════════════════════════════════ -->
@@ -909,11 +837,7 @@ footer{background:var(--cream);border-top:1px solid rgba(154,124,58,0.2);padding
     </div>
     <div>
       <div class="footer-col-label">Social</div>
-      <div class="footer-social-row">
-        <a href="#" aria-label="Facebook">f</a>
-        <a href="#" aria-label="Instagram">◎</a>
-        <a href="#" aria-label="WhatsApp">✉</a>
-      </div>
+      <div class="footer-social-row" id="footer-social-row"></div>
     </div>
   </div>
   <div style="text-align:center;margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(154,124,58,0.2);font-size:0.78rem;color:var(--muted);">
@@ -971,6 +895,20 @@ document.addEventListener('DOMContentLoaded', function() {
   if (fn) fn.innerHTML = CONFIG.groom + ' &amp; ' + CONFIG.bride;
   const fp = document.getElementById('footer-phone');
   if (fp) fp.textContent = CONFIG.venuePhone;
+
+  // Social links (clickable, only shows accounts that are filled in config)
+  const socialRow = document.getElementById('footer-social-row');
+  if (socialRow && CONFIG.socials) {
+    const icons = {
+      instagram: '◎',
+      whatsapp:  '✉',
+      facebook:  'f'
+    };
+    socialRow.innerHTML = Object.keys(icons)
+      .filter(key => CONFIG.socials[key])
+      .map(key => `<a href="${CONFIG.socials[key]}" target="_blank" rel="noopener" aria-label="${key}">${icons[key]}</a>`)
+      .join('');
+  }
 
   // QR ticket labels
   const qrName = document.getElementById('qr-event-name');
@@ -1229,12 +1167,12 @@ function downloadRSVPQR() {
 
   ctx.fillStyle = '#fdf8f5';
   ctx.fillRect(0,0,380,520);
-  ctx.strokeStyle = '#c9a96e';
+  ctx.strokeStyle = '#b5794f';
   ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.roundRect(8,8,364,504,16);
   ctx.stroke();
-  ctx.fillStyle = '#9b7c3a';
+  ctx.fillStyle = '#5c2a1e';
   ctx.beginPath();
   ctx.roundRect(8,8,364,80,16);
   ctx.fill();
@@ -1259,7 +1197,7 @@ function downloadRSVPQR() {
   ctx.fillStyle = '#bbb';
   ctx.font = '11px monospace';
   ctx.fillText('TICKET: ' + rsvpTicketId, 190, 400);
-  ctx.fillStyle = '#9b7c3a';
+  ctx.fillStyle = '#5c2a1e';
   ctx.font = '24px serif';
   ctx.fillText('♥', 190, 460);
   ctx.fillStyle = '#bbb';
@@ -1369,7 +1307,7 @@ async function renderGreetings() {
       wall.innerHTML = '<div class="no-greetings">Belum ada ucapan. Jadilah yang pertama! 🌸</div>';
       return;
     }
-    const cards = [...greetings, ...greetings].map(g => `
+    const cards = greetings.map(g => `
       <div class="greet-card">
         <div class="greet-name">✨ ${escHtml(g.name)}</div>
         <div class="greet-msg">"${escHtml(g.msg)}"</div>
@@ -1377,7 +1315,6 @@ async function renderGreetings() {
       </div>
     `).join('');
     wall.innerHTML = `<div class="greetings-track" id="greetings-track">${cards}</div>`;
-    initGreetHover();
   } catch(e) {
     wall.innerHTML = '<div class="no-greetings">Belum ada ucapan. Jadilah yang pertama! 🌸</div>';
   }
@@ -1480,33 +1417,6 @@ window.addEventListener('scroll', function() {
 });
 
 // ── GREETING HOVER OFFSET ──
-function initGreetHover() {
-  const wall = document.getElementById('greetings-wall');
-  const track = document.getElementById('greetings-track');
-  if (!wall || !track) return;
-  let offset = 0, targetOffset = 0, raf = null;
-  wall.addEventListener('mousemove', function(e) {
-    const rect = wall.getBoundingClientRect();
-    const pct = (e.clientX - rect.left) / rect.width;
-    targetOffset = (pct - 0.5) * 2 * -160;
-    if (!raf) raf = requestAnimationFrame(animateOffset);
-  });
-  wall.addEventListener('mouseleave', function() {
-    targetOffset = 0;
-    if (!raf) raf = requestAnimationFrame(animateOffset);
-  });
-  function animateOffset() {
-    offset += (targetOffset - offset) * 0.08;
-    track.style.marginLeft = offset.toFixed(2) + 'px';
-    if (Math.abs(targetOffset - offset) > 0.1) {
-      raf = requestAnimationFrame(animateOffset);
-    } else {
-      offset = targetOffset;
-      track.style.marginLeft = offset + 'px';
-      raf = null;
-    }
-  }
-}
 </script>
 </body>
 </html>
