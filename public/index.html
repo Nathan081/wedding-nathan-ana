@@ -184,18 +184,46 @@ nav a:hover{color:var(--gold);}
 }
 
 /* ════════════════════════════════════
-   GALLERY (gold bg)
+   GALLERY — COVERFLOW (gold bg)
 ═══════════════════════════════════════ */
-.gallery-section{background:var(--gold-bg);padding:6rem 2rem;}
-.gallery-grid{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
-.gallery-item{position:relative;aspect-ratio:1/1;opacity:0;transform:scale(0.9);transition:opacity 0.5s cubic-bezier(.22,1,.36,1),transform 0.5s cubic-bezier(.22,1,.36,1);cursor:pointer;background:#fff;padding:0.4rem 0.4rem 1.1rem;border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,0.2);}
-.gallery-item.visible{opacity:1;transform:scale(1);}
-.gallery-item .frame-inner{width:100%;height:100%;overflow:hidden;border-radius:2px;}
-.gallery-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.4s ease;}
-.gallery-item:hover img{transform:scale(1.06);}
-.gallery-num{position:absolute;top:0.7rem;right:0.7rem;background:rgba(201,169,110,0.92);color:#0e0c0a;font-weight:700;font-size:0.62rem;padding:0.2rem 0.45rem;border-radius:20px;letter-spacing:0.06em;z-index:2;}
-.gallery-caption{display:none;}
-@media(max-width:640px){.gallery-grid{grid-template-columns:repeat(3,1fr);gap:0.5rem;}.gallery-item{padding:0.25rem 0.25rem 0.7rem;}.gallery-num{display:none;}}
+.gallery-section{background:var(--gold-bg);padding:6rem 0;overflow:hidden;}
+.coverflow{position:relative;height:380px;margin:3.5rem auto 0;max-width:1000px;display:flex;align-items:center;justify-content:center;perspective:1400px;}
+.coverflow-track{position:relative;width:100%;height:100%;transform-style:preserve-3d;}
+.cf-item{position:absolute;top:50%;left:50%;width:230px;height:290px;margin:-145px 0 0 -115px;cursor:pointer;transition:transform 0.7s cubic-bezier(.22,.85,.28,1),opacity 0.7s ease,filter 0.5s ease;will-change:transform;}
+.cf-item.is-active{cursor:zoom-in;}
+.cf-frame{width:100%;height:100%;background:#fff;padding:0.5rem 0.5rem 1.2rem;border-radius:4px;box-shadow:0 20px 50px -14px rgba(14,12,10,0.55);transition:box-shadow 0.4s ease;}
+.cf-item.is-active .cf-frame{box-shadow:0 24px 60px -10px rgba(14,12,10,0.6),0 0 0 2px var(--gold);}
+.cf-frame-inner{width:100%;height:100%;overflow:hidden;border-radius:2px;}
+.cf-frame img{width:100%;height:100%;object-fit:cover;display:block;}
+.cf-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.9);border:none;color:#1a1610;width:46px;height:46px;border-radius:50%;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:20;transition:background 0.25s,transform 0.25s;box-shadow:0 6px 20px rgba(0,0,0,0.25);}
+.cf-nav:hover{background:var(--gold);transform:translateY(-50%) scale(1.07);}
+.cf-nav:disabled{opacity:0.35;cursor:default;}
+.cf-nav:disabled:hover{background:rgba(255,255,255,0.9);transform:translateY(-50%);}
+.cf-prev{left:2%;}
+.cf-next{right:2%;}
+.cf-caption{max-width:520px;margin:1.6rem auto 0;text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.15rem;color:#f5eed9;opacity:0;transform:translateY(6px);transition:opacity 0.4s ease,transform 0.4s ease;min-height:1.6em;padding:0 1rem;}
+.cf-caption.show{opacity:1;transform:translateY(0);}
+.cf-dots{display:flex;gap:0.5rem;justify-content:center;margin-top:1.4rem;}
+.cf-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.4);border:none;cursor:pointer;padding:0;transition:background 0.3s,transform 0.3s;}
+.cf-dot.active{background:var(--gold);transform:scale(1.35);}
+@media(max-width:640px){
+  .coverflow{height:300px;}
+  .cf-item{width:170px;height:220px;margin:-110px 0 0 -85px;}
+  .cf-nav{width:38px;height:38px;font-size:1.05rem;}
+  .cf-prev{left:1%;}
+  .cf-next{right:1%;}
+}
+
+/* ── GALLERY LIGHTBOX ── */
+#gallery-lightbox{position:fixed;inset:0;z-index:9998;background:rgba(10,8,5,0.94);display:none;align-items:center;justify-content:center;flex-direction:column;}
+#gallery-lightbox.open{display:flex;}
+#gallery-lightbox img{max-width:90vw;max-height:78vh;object-fit:contain;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+#gallery-lightbox .lb-caption{color:#f0e9d5;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem;margin-top:1rem;text-align:center;padding:0 1.5rem;}
+#gallery-lightbox .lb-close{position:absolute;top:1.2rem;right:1.5rem;color:#fff;font-size:2rem;line-height:1;cursor:pointer;background:none;border:none;}
+#gallery-lightbox .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.12);border:none;color:#fff;font-size:1.6rem;width:44px;height:44px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+#gallery-lightbox .lb-prev{left:1rem;}
+#gallery-lightbox .lb-next{right:1rem;}
+@media(max-width:640px){#gallery-lightbox .lb-nav{width:38px;height:38px;font-size:1.3rem;}}
 
 /* ── GALLERY LIGHTBOX ── */
 #gallery-lightbox{position:fixed;inset:0;z-index:9998;background:rgba(10,8,5,0.94);display:none;align-items:center;justify-content:center;flex-direction:column;}
@@ -674,9 +702,15 @@ footer{background:var(--cream);border-top:1px solid rgba(154,124,58,0.2);padding
     <h2 class="sec-title-light">Our Gallery</h2>
     <p class="sec-sub-light">Momen-momen berharga kita</p>
   </div>
-  <div class="gallery-grid" id="gallery-grid">
-    <!-- populated by JS -->
+  <div class="coverflow" id="coverflow" tabindex="0">
+    <div class="coverflow-track" id="coverflow-track">
+      <!-- populated by JS -->
+    </div>
+    <button class="cf-nav cf-prev" id="cf-prev" aria-label="Foto sebelumnya">&#10094;</button>
+    <button class="cf-nav cf-next" id="cf-next" aria-label="Foto berikutnya">&#10095;</button>
   </div>
+  <p class="cf-caption" id="cf-caption"></p>
+  <div class="cf-dots" id="cf-dots"></div>
 </section>
 
 <!-- Gallery Lightbox (full view on tap) -->
@@ -1012,30 +1046,95 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.story-card-inline.reveal').forEach(el => revealObserver.observe(el));
   }
 
-  // ── Gallery (compact frame grid + lightbox) ──
-  const galleryGrid = document.getElementById('gallery-grid');
-  if (galleryGrid) {
-    galleryGrid.innerHTML = CONFIG.gallery.map((g, i) => `
-      <div class="gallery-item" data-gallery-index="${i}">
-        <span class="gallery-num">${String(i + 1).padStart(2, '0')}</span>
-        <div class="frame-inner">
-          <img src="${escHtml(g.src)}" alt="${escHtml(g.caption)}"
-               onerror="this.src='https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=70'"/>
+  // ── Gallery (coverflow carousel + lightbox) ──
+  const cfTrack = document.getElementById('coverflow-track');
+  if (cfTrack) {
+    const photos = CONFIG.gallery;
+    cfTrack.innerHTML = photos.map((g, i) => `
+      <div class="cf-item" data-index="${i}">
+        <div class="cf-frame">
+          <div class="cf-frame-inner">
+            <img src="${escHtml(g.src)}" alt="${escHtml(g.caption)}"
+                 onerror="this.src='https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=70'"/>
+          </div>
         </div>
       </div>
     `).join('');
 
-    const galleryObserver = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          setTimeout(() => e.target.classList.add('visible'), 80);
-          galleryObserver.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.12 });
-    document.querySelectorAll('.gallery-item').forEach(el => galleryObserver.observe(el));
+    const cfDots = document.getElementById('cf-dots');
+    cfDots.innerHTML = photos.map((_, i) => `<button class="cf-dot" data-index="${i}" aria-label="Foto ${i + 1}"></button>`).join('');
 
-    // Lightbox
+    const items = Array.from(cfTrack.querySelectorAll('.cf-item'));
+    const dots = Array.from(cfDots.querySelectorAll('.cf-dot'));
+    const cfPrev = document.getElementById('cf-prev');
+    const cfNext = document.getElementById('cf-next');
+    const cfCaption = document.getElementById('cf-caption');
+    const coverflowEl = document.getElementById('coverflow');
+    let active = 0;
+
+    // This transform math is what animates the move to the next/previous photo:
+    // each item's position, depth, rotation and fade are recalculated and the
+    // CSS transition on .cf-item (see stylesheet) glides it there smoothly.
+    function renderCoverflow() {
+      items.forEach((item, i) => {
+        const offset = i - active;
+        const abs = Math.abs(offset);
+        const x = offset * 130;
+        const z = -abs * 170;
+        const rotY = offset * -33;
+        const scale = offset === 0 ? 1 : 0.74;
+        const opacity = abs > 2 ? 0 : 1 - abs * 0.3;
+        item.style.transform = `translateX(${x}px) translateZ(${z}px) rotateY(${rotY}deg) scale(${scale})`;
+        item.style.opacity = opacity;
+        item.style.zIndex = 10 - abs;
+        item.style.pointerEvents = abs > 2 ? 'none' : 'auto';
+        item.classList.toggle('is-active', offset === 0);
+      });
+      dots.forEach((d, i) => d.classList.toggle('active', i === active));
+      cfPrev.disabled = active === 0;
+      cfNext.disabled = active === items.length - 1;
+
+      // Crossfade the caption in sync with the slide
+      cfCaption.classList.remove('show');
+      setTimeout(() => {
+        cfCaption.textContent = photos[active].caption || '';
+        cfCaption.classList.add('show');
+      }, 180);
+    }
+
+    function goTo(index) {
+      active = Math.max(0, Math.min(items.length - 1, index));
+      renderCoverflow();
+    }
+
+    items.forEach((item, i) => {
+      item.addEventListener('click', () => {
+        if (i === active) { openLightbox(active); }
+        else { goTo(i); }
+      });
+    });
+    dots.forEach((d, i) => d.addEventListener('click', () => goTo(i)));
+    cfPrev.addEventListener('click', () => goTo(active - 1));
+    cfNext.addEventListener('click', () => goTo(active + 1));
+
+    coverflowEl.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') goTo(active - 1);
+      if (e.key === 'ArrowRight') goTo(active + 1);
+    });
+
+    let touchStartX = null;
+    coverflowEl.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+    coverflowEl.addEventListener('touchend', (e) => {
+      if (touchStartX === null) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (dx > 40) goTo(active - 1);
+      else if (dx < -40) goTo(active + 1);
+      touchStartX = null;
+    });
+
+    renderCoverflow();
+
+    // Lightbox (opens on tapping the already-centered photo)
     const lb = document.getElementById('gallery-lightbox');
     const lbImg = document.getElementById('lb-img');
     const lbCaption = document.getElementById('lb-caption');
@@ -1043,7 +1142,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function openLightbox(i) {
       lbIndex = i;
-      const g = CONFIG.gallery[lbIndex];
+      const g = photos[lbIndex];
       lbImg.src = g.src;
       lbImg.alt = g.caption || '';
       lbCaption.textContent = g.caption || '';
@@ -1051,13 +1150,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     function closeLightbox() { lb.classList.remove('open'); }
     function showRelative(delta) {
-      lbIndex = (lbIndex + delta + CONFIG.gallery.length) % CONFIG.gallery.length;
+      lbIndex = (lbIndex + delta + photos.length) % photos.length;
+      goTo(lbIndex);
       openLightbox(lbIndex);
     }
 
-    document.querySelectorAll('.gallery-item').forEach((el) => {
-      el.addEventListener('click', () => openLightbox(Number(el.dataset.galleryIndex)));
-    });
     document.getElementById('lb-close').addEventListener('click', closeLightbox);
     document.getElementById('lb-prev').addEventListener('click', (e) => { e.stopPropagation(); showRelative(-1); });
     document.getElementById('lb-next').addEventListener('click', (e) => { e.stopPropagation(); showRelative(1); });
